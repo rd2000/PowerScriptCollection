@@ -6,8 +6,8 @@ A custom collection of powershell scripts.
 
 ## Overview
 
-in [Section `ConvertTo-MSSQL.ps1`](#ConvertTo-MSSQL.ps1)
-in [Section `Join-Objects.ps1`](#Join-Objects.ps1)
+# [ConvertTo-MSSQL.ps1](#convertto-mssql.ps1)
+# [Join-Objects.ps1](#join-objects.ps1)
 
 ---
 
