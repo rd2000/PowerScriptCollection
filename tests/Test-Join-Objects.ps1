@@ -3,7 +3,6 @@
 $IncPath = ".\functions\"
 .$IncPath"Join-Objects.ps1"
 
-
 # Example data
 $left = @(
     [PSCustomObject]@{ ID = 1; Name = "John" }

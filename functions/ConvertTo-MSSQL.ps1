@@ -83,22 +83,22 @@ function ConvertTo-MSSQL {
     )
 
     # Parameters
-    $StartUptime=Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $StartUptime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-    $object=$InputObj
-    $table=$TableName
-    $primaryKey=$PrimaryKey
+    $object = $InputObj
+    $table = $TableName
+    $primaryKey = $PrimaryKey
 
 
     # Create Dynamic Table
     $sql = @()
 
-    $sql += "-- @Script:        ConvertObj2MSSQL"
+    $sql += "-- @Script:        ConvertTo-MSSQL"
     $sql += "-- @Description:   Convert a Powershell object to SQL for Microsoft SQL Server"
-    $sql += "-- @Version        0.0.1"
+    $sql += "-- @Version        0.0.2"
     $sql += "--"
     $sql += "-- @WebUrl:        https://myitdb.de"
-    $sql += "-- @E-Mail:        rico.schlender@myitdb.de"
+    $sql += "-- @E-Mail:        rd2000_git@myitdb.de"
     $sql += "--"
     $sql += "-- Host: $env:computername"
     $sql += "-- Created: $StartUptime"
@@ -150,7 +150,7 @@ function ConvertTo-MSSQL {
 
     if ($CreateStatementOnly) {
         # Return only the SQL CREATE TABLE Statement
-        $string=Out-String -InputObject $sql
+        $string = Out-String -InputObject $sql
         return $string
     
     } else {
@@ -159,7 +159,7 @@ function ConvertTo-MSSQL {
         $sql += "" 
         $sql += "-- INSERT and UPDATE TABLE STATEMENT"
 
-        $x=0
+        $x = 0
         $object | ForEach-Object {
             
             $x++
@@ -190,7 +190,7 @@ function ConvertTo-MSSQL {
                 }
             }
         
-            # Add Discovered and Updated Key
+            # Add discovered and updated key
             if ($AddInsertedKey) { $sql += "`t`t`t[$AddInsertedKey]=GETDATE()," }
             if ($AddUpdatedKey) { $sql += "`t`t`t[$AddUpdatedKey]=GETDATE()," }
 
@@ -228,7 +228,7 @@ function ConvertTo-MSSQL {
         $sql += "" 
         $sql += "-- End: $EndUptime"
 
-        $string=Out-String -InputObject $sql
+        $string = Out-String -InputObject $sql
         return $string
     }
 }

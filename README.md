@@ -1,6 +1,6 @@
 # PSFunctions
 
-A custom collection of powershell scripts.
+A custom collection of powershell functions
 
 ---
 
@@ -12,6 +12,12 @@ A custom collection of powershell scripts.
 ---
 
 ## Convert Objects to MSSQL
+
+SCRIPT
+
+```powershell
+ConvertTo-MSSQL.ps1
+```
 
 DESCRIPTION
 
@@ -114,9 +120,10 @@ The key must exists on both objects. After join returns the two objects as one.
 
 See examples in the test folder.
 
-<# TEST #>
 
 ```powershell
+<# TEST #>
+
 $IncPath = ".\functions\"
 .$IncPath"Join-Objects.ps1"
 
