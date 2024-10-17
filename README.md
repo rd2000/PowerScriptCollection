@@ -6,8 +6,8 @@ A custom collection of powershell scripts.
 
 ## Overview
 
-#### [Convert Objects to MSSQL](#convert-objects-to-mssql)
-#### [Join PowerShell Objects](#join-powershell-objects)
+[Convert Objects to MSSQL](#convert-objects-to-mssql)
+[Join PowerShell Objects](#join-powershell-objects)
 
 ---
 
