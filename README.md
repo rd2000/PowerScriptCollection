@@ -8,8 +8,8 @@ A custom collection of powershell scripts.
 
 DESCRIPTION
 
-__A generic function for converting Powershell objects into MSSQL statements.
-Convert a PowerShell object to microsoft structured query language. (MSSQL)__
+__A generic function for converting Powershell objects into MSSQL statements.__
+Convert a PowerShell object to microsoft structured query language. (MSSQL)
 
 Reads all membertypes of type noteproperty or property and optional you can add an inserted and also an updated column.
 The function doesn't connect the MSSQL server, its only generates the SQL.
