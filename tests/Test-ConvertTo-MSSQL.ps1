@@ -14,7 +14,7 @@ $datas = @(
     [PSCustomObject]@{ ID = 7; Name = "Markus"; Lastname = "Wolf" }
     [PSCustomObject]@{ ID = 8; Name = "Anna"; Lastname = "Krause" }
     [PSCustomObject]@{ ID = 9; Name = "Peter"; Lastname = "Bauer" }
-    [PSCustomObject]@{ ID = 10; Name = "Julia"; Lastname = "Zimmermann" }
+    [PSCustomObject]@{ ID = 10; Name = "Petra"; Lastname = "Zimmermann" }
 )
 
 # Create SQL
