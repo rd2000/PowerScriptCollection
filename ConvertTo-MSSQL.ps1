@@ -1,7 +1,3 @@
-<#
-    20220205 mod     On CREATE TABLE STATEMENT int => bigint (because pwsh and mssql int are note the same)
-#>
-
 function ConvertObj2MSSQL {
 
     <#
