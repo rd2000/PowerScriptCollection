@@ -11,6 +11,7 @@ DESCRIPTION
 A generic function for converting Powershell objects into MSSQL statements.
 
 Convert a PowerShell object to microsoft structured query language. (MSSQL)
+
 Reads all membertypes of type noteproperty or property and optional you can add an inserted and also an updated column.
 The function doesn't connect the MSSQL server, its only generates the SQL.
 Please remember that the script is not designed for large data sets or for high performance.
@@ -85,7 +86,7 @@ MERGE INTO persons AS t
 
 ### HISTORY
 
-20220205 mod    On CREATE TABLE STATEMENT int => bigint (Because pwsh and mssql int not are the same type.) ?
+20220205 mod    On CREATE TABLE STATEMENT int => bigint (Because pwsh and mssql int not are the same type.)?
 20200402 init   First release as a port of a MySQL conversion function.
 
 ---
