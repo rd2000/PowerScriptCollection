@@ -1,14 +1,16 @@
-function ConvertObj2MSSQL {
+function ConvertTo-MSSQL {
 
     <#
         .SYNOPSIS
         Convert Object to SQL (A generic powershell to sql converter)
 
         .DESCRIPTION
-        Converts a PowerShell object to Microsoft Structured Query Language.
-        Reads all MemberTypes of Type NoteProperty or property and optional you can add an inserted and also an updated column.
-        This function was developed to provide fast and easy inventury scripts for sysadmins, LIKE me ;-).
+        Convert a PowerShell object to microsoft structured query language. (MSSQL)
+        Reads all membertypes of type noteproperty or property and optional you can add an inserted and also an updated column.
         The function doesn't connect the MSSQL server, its only generates the SQL.
+        Please remember that the script is not designed for large data sets nor for high performance.
+        It is a generic function that only supports rudimentary SQL data types, 
+        but it can be useful for converting any objects to SQL and storing them in databases.
           
         .PARAMETER InputObj
         Specifies the input oject
@@ -38,7 +40,7 @@ function ConvertObj2MSSQL {
         .EXAMPLE
         PS> # Get some propertys from Win32_ComputerSystem and create SQL table my_win32_computersystem. Add an inserted and updated keya and move output to clipboard.
         PS> $src=Get-WmiObject -class Win32_ComputerSystem | Select-Object -Property PSComputerName,Username,Model,Domain,Description,DNSHostName,Systemtype,TotalPhysicalMemory,Name
-        PS> $sql=obj2SQL -InputObj $src -TableName "my_win32_computersystem" -PrimaryKey "Name" -AddInsertedKey "discovered" -AddUpdatedKey "updated" -CreateStatementOnly $false
+        PS> $sql=ConvertObj2MSSQL -InputObj $src -TableName "my_win32_computersystem" -PrimaryKey "Name" -AddInsertedKey "discovered" -AddUpdatedKey "updated" -CreateStatementOnly $false
         PS> $sql | clip
 
         .LINK
@@ -91,7 +93,7 @@ function ConvertObj2MSSQL {
     # Create Dynamic Table
     $sql = @()
 
-    $sql += "-- @Script:        PowerShell Object 2 MSSQL"
+    $sql += "-- @Script:        ConvertObj2MSSQL"
     $sql += "-- @Description:   Convert a Powershell object to SQL for Microsoft SQL Server"
     $sql += "-- @Version        0.0.1"
     $sql += "--"
