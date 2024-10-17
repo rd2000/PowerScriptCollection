@@ -6,12 +6,12 @@ A custom collection of powershell scripts.
 
 ## Overview
 
-### [ConvertTo-MSSQL](#convertto-mssql)
-### [Join-Objects](#join-objects)
+#### [Convert Objects to MSSQL](#convert-objects-to-mssql)
+#### [Join PowerShell Objects](#join-powershell-objects)
 
 ---
 
-## ConvertTo-MSSQL
+## Convert Objects to MSSQL
 
 DESCRIPTION
 
@@ -97,7 +97,13 @@ MERGE INTO persons AS t
 
 ---
 
-## [Join-Objects]
+## Join PowerShell Objects
+
+SCRIPT
+
+```powershell
+Join-Objects.ps1
+```
 
 DESCRIPTION
 
