@@ -8,7 +8,7 @@ A custom collection of powershell functions
 
 [Convert Objects to MSSQL](#convert-objects-to-mssql)  
 [Join PowerShell Objects](#join-powershell-objects)  
-[Rename NoteProperty of objects](#rename_noteproperty-of-objects)  
+[Rename NoteProperty of objects](#rename-noteproperty-of-objects)  
 
 ---
 
