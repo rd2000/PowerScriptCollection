@@ -1,6 +1,6 @@
 # PSFunctions
 
-A custom collection of powershell functions
+A custom collection of powershell functions.
 
 ---
 
