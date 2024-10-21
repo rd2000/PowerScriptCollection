@@ -17,8 +17,8 @@
     # Get JSON mainobject name
     $mainObject = $json.PSObject.Properties.Name
 
-    # Teile den Text in einzelne Zeilen auf
-    $lines = $textTable -split "`n"
+    # Teile den Text in einzelne Zeilen auf, unabhängig vom Betriebssystem
+    $lines = $text -split "`r?`n"
 
     # Entferne Header und Footer basierend auf JSON
     $removeHeader = $json.$mainObject.removelines.header
