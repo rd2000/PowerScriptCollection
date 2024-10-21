@@ -32,26 +32,11 @@ $jsonString = @"
             "footer": 3
         },
         "extract": {
-            "Vorname": {
-                "start": 2,
-                "length": 10
-            },
-            "Nachname": {
-                "start": 14,
-                "length": 10
-            },
-            "PLZ": {
-                "start": 26,
-                "length": 6
-            },
-            "Ort": {
-                "start": 34,
-                "length": 15
-            },
-            "Straße": {
-                "start": 51,
-                "length": 18
-            }
+            "Vorname": { "start": 2, "length": 10 },
+            "Nachname": { "start": 14, "length": 10 },
+            "PLZ": { "start": 26, "length": 6 },
+            "Ort": { "start": 34, "length": 15 },
+            "Straße": { "start": 51, "length": 18 }
         }
     }
 }
