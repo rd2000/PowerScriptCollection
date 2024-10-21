@@ -8,7 +8,7 @@ A custom collection of powershell functions.
 
 [Convert Objects to MSSQL](#convert-objects-to-mssql)  
 [Join PowerShell Objects](#join-powershell-objects)  
-[Rename NoteProperty of objects](#rename-noteproperty-of-objects)  
+[Rename NoteProperty of objects](#rename-noteproperty-of-objects)
 
 ---
 
@@ -28,7 +28,7 @@ Convert a PowerShell object to microsoft structured query language. (MSSQL)
 Reads all membertypes of type noteproperty or property and optional you can add an inserted and also an updated column.
 The function doesn't connect the MSSQL server, its only generates the SQL.
 Please remember that the script is not designed for large data sets or for high performance.
-It is a generic function that only supports rudimentary SQL data types, 
+It is a generic function that only supports rudimentary SQL data types,
 but it can be useful for converting any objects to SQL and storing them in databases.
 
 ### A simple test
@@ -121,7 +121,6 @@ The key must exists on both objects. After join returns the two objects as one.
 
 See examples in the test folder.
 
-
 ```powershell
 <# TEST #>
 
@@ -168,13 +167,11 @@ Rename-NoteProperty.ps1
 
 DESCRIPTION
 
-__A function to rename one or multiple NoteProperty of objects.__  
-
+__A function to rename one or multiple NoteProperty of objects.__
 
 ### A simple test
 
 See examples in the test folder.
-
 
 ```powershell
 <# TEST #>
