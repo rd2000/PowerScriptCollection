@@ -8,7 +8,8 @@ A custom collection of powershell functions.
 
 [Convert Objects to MSSQL](#convert-objects-to-mssql)  
 [Join PowerShell Objects](#join-powershell-objects)  
-[Rename NoteProperty of objects](#rename-noteproperty-of-objects)
+[Rename NoteProperty of objects](#rename-noteproperty-of-objects)  
+[Convert TextTable to Object](#convert-texttable-to-object)  
 
 ---
 
@@ -199,3 +200,18 @@ Berlin
 Tokyo
 Delhi
 ```
+
+
+---
+
+### Convert texttable to object
+
+SCRIPT
+
+```powershell
+ConvertFrom-TextTable.ps1
+```
+
+DESCRIPTION
+
+TODO
