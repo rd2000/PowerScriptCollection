@@ -5,7 +5,7 @@ $IncPath = ".\functions\"
 
 
 # Beispieltext (die Tabelle als String)
-$text = @"
+$textTable = @"
 +-----------+-----------+-------+----------------+-------------------+
 | Vorname   | Nachname  | PLZ   | Ort            | Straße            |
 +-----------+-----------+-------+----------------+-------------------+
@@ -29,7 +29,7 @@ $jsonString = @"
     "tableaddresses": {
         "removelines": {
             "header": 3,
-            "footer": 3
+            "footer": 1
         },
         "extract": {
             "Vorname": { "start": 2, "length": 10 },
@@ -42,5 +42,5 @@ $jsonString = @"
 }
 "@
 
-$result = ConvertFrom-TextTable -textTable $text -jsonString $jsonString
+$result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString
 $result
