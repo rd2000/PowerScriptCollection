@@ -45,7 +45,7 @@ $jsonString = @"
 }
 "@
 
-# Show table
+# Convert simple text table to an PowerShell object
 $result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString -mapName "salesData"
 
 # Calculate total sales per category
