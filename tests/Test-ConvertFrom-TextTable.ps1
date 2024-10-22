@@ -42,5 +42,5 @@ $jsonString = @"
 }
 "@
 
-$result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString
+$result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString -mapName "tableaddresses"
 $result

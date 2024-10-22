@@ -18,6 +18,9 @@
         the header lines to be removed, as well as the start positions and lengths of the
         columns to be extracted.
 
+        .PARAMETER mapName
+        The JSON element Name, where JSON contain the extract datas.
+
         .EXAMPLE
         $textTable = @"
         Vorname Nachname  PLZ   Ort       Straße
@@ -42,7 +45,7 @@
         }
         "@
 
-        $result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString
+        $result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString -mapName "tableaddresses"
         $result | Format-Table -AutoSize
 
         This would convert the table into an array of PowerShell objects containing the
@@ -54,14 +57,17 @@
         [string]$textTable,
 
         [Parameter(Mandatory = $true)]
-        [string]$jsonString
+        [string]$jsonString,
+
+        [Parameter(Mandatory = $true)]
+        [string]$mapName
     )
 
     # Convert JSON-String to an PowerShell object
     $json = $jsonString | ConvertFrom-Json
 
     # Access to the relevant parts of the JSON
-    $mainObject = $json.tableaddresses
+    $mainObject = $json.$mapName
     $removeHeader = $mainObject.removelines.header
     $removeFooter = $mainObject.removelines.footer
     $cols = $mainObject.extract
