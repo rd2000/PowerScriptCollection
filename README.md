@@ -276,6 +276,8 @@ $result
 
 ### Output
 
+In this example, the output only shows 3 lines from the 10-line object.
+
 ```
 ...
 Vorname  : Laura
