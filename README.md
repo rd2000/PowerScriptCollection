@@ -1,4 +1,4 @@
-# PSFunctions
+# PowerScriptCollection 
 
 A custom collection of powershell functions.
 
