@@ -4,7 +4,7 @@ $IncPath = ".\functions\"
 .$IncPath"ConvertFrom-TextTable.ps1"
 
 
-# Beispieltext (die Tabelle als String)
+# Example data (The table as string)
 $textTable = @"
 +-----------+-----------+-------+----------------+-------------------+
 | Vorname   | Nachname  | PLZ   | Ort            | Straße            |
@@ -23,7 +23,7 @@ $textTable = @"
 "@
 
 
-# JSON-Definition als String
+# JSON definition as string
 $jsonString = @"
 {
     "tableaddresses": {
