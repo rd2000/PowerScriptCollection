@@ -90,15 +90,17 @@
             $start = $cols.$columnsName.start - 1  # Corrected for 0-based indices in PowerShell
             $length = $cols.$columnsName.length
 
-            # Ensure that the start and length are within the line
-            if ($start + $length -le $line.Length) {
-                # Get value and trim 
-                $value = ($line.Substring($start, $length)).Trim()
+            # If the line is shorter, use the remaining length of the line
+            if ($start -lt $line.Length) {
+                $endIndex = [Math]::Min($start + $length, $line.Length) - $start
+                 # Get value and trim 
+                $value = ($line.Substring($start, $endIndex)).Trim()
                 
                 # Create field dynamicly
                 $columns | Add-Member -NotePropertyName $columnsName -NotePropertyValue $value
             } else {
-                Write-Output "Error: Invalid range for $columnsName on line: $line"
+                # Add an empty value if the column cannot be extracted
+                $columns | Add-Member -NotePropertyName $spaltenName -NotePropertyValue ""
             }
         }
 
