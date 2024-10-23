@@ -1,4 +1,9 @@
-<# TEST #>
+<#  
+    example.003.ps1
+    
+    ConvertFrom-TextTable.ps1
+    
+#> 
 
 $IncPath = ".\functions\"
 .$IncPath"ConvertFrom-TextTable.ps1"
