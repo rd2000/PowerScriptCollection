@@ -48,7 +48,7 @@ $jsonString = @"
 Write-Host "This is a test for function: Get-CustomHash.ps1" -ForegroundColor Blue
 
 # First: Check, if the function has been changed since the last test
-if ((Get-FileHash .\functions\ConvertFrom-TextTable.ps1 -Algorithm 'MD5').Hash -ne "92299882A8A6D186C63D816AF8BFC686") {
+if ((Get-FileHash -Path ".\functions\ConvertFrom-TextTable.ps1" -Algorithm 'MD5').Hash -ne "92299882A8A6D186C63D816AF8BFC686") {
     Write-Warning "Function has been modified since the last test!"
     Write-Host "If test passed, please adjust the checksum of the function to disable this warning."
 }
