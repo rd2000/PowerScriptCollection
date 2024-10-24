@@ -100,7 +100,7 @@
                 $columns | Add-Member -NotePropertyName $columnsName -NotePropertyValue $value
             } else {
                 # Add an empty value if the column cannot be extracted
-                $columns | Add-Member -NotePropertyName $spaltenName -NotePropertyValue ""
+                $columns | Add-Member -NotePropertyName $columnsName -NotePropertyValue ""
             }
         }
 
