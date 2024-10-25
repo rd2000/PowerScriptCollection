@@ -5,7 +5,9 @@
     
 #> 
 
-$IncPath = ".\functions\"
+Set-Location -Path $PSScriptRoot
+
+$IncPath = "..\functions\"
 .$IncPath"ConvertTo-MSSQL.ps1"
 
 # JSON - 10 largest cities
