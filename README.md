@@ -10,9 +10,9 @@ A custom collection of powershell functions.
 [Join PowerShell Objects](#join-powershell-objects)  
 [Rename NoteProperty of objects](#rename-noteproperty-of-objects)  
 [Convert TextTable to Object](#convert-texttable-to-object)  
-[Get Custom Credential](#get-custom-credential)
-[Get Custom Hash](#get-custom-hash)
-[Get Custom Password](#get-custom-password)
+[Get Custom Credential](#get-custom-credential)  
+[Get Custom Hash](#get-custom-hash)  
+[Get Custom Password](#get-custom-password)  
 
 ---
 
