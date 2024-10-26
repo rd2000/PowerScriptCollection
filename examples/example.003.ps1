@@ -5,7 +5,7 @@
     
 #> 
 
-$IncPath = ".\functions\"
+$IncPath = "..\functions\"
 .$IncPath"ConvertFrom-TextTable.ps1"
 
 

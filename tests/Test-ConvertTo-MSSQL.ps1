@@ -1,6 +1,6 @@
 <# TEST #>
 
-$IncPath = ".\functions\"
+$IncPath = "..\functions\"
 .$IncPath"ConvertTo-MSSQL.ps1"
 
 # Sample Datas

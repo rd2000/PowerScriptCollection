@@ -1,6 +1,6 @@
 <# TEST #>
 
-$IncPath = ".\functions\"
+$IncPath = "..\functions\"
 .$IncPath"Rename-NoteProperty.ps1"
 
 # Example data

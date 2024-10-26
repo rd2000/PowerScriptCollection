@@ -1,6 +1,6 @@
 <# TEST - Do not change the test, please! #>
 
-$IncPath = ".\functions\"
+$IncPath = "..\functions\"
 .$IncPath"ConvertFrom-TextTable.ps1"
 .$IncPath"Get-CustomHash.ps1"
 

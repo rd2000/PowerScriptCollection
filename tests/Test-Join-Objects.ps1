@@ -1,6 +1,6 @@
 <# TEST #>
 
-$IncPath = ".\functions\"
+$IncPath = "..\functions\"
 .$IncPath"Join-Objects.ps1"
 
 # Example data

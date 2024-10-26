@@ -1,6 +1,6 @@
 <# TEST - Do not change the test, please! #>
 
-$IncPath = ".\functions\"
+$IncPath = "..\functions\"
 .$IncPath"Get-CustomHash.ps1"
 
 # The test intro
