@@ -1,14 +1,16 @@
 # PowerScriptCollection 
 
-A custom collection of powershell functions.
+A custom collection of powershell functions, scripts and code snippets.  
 
 ---
 
 ## Overview
 
+### Functions
+
 [Convert Objects to MSSQL](#convert-objects-to-mssql)  
 [Join PowerShell Objects](#join-powershell-objects)  
-[Rename NoteProperty of objects](#rename-noteproperty-of-objects)  
+[Rename NoteProperty of Objects](#rename-noteproperty-of-objects)  
 [Convert TextTable to Object](#convert-texttable-to-object)  
 [Get Custom Credential](#get-custom-credential)  
 [Get Custom Hash](#get-custom-hash)  
