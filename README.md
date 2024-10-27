@@ -40,7 +40,9 @@ See [documentation](docs/ConvertTo-MSSQL.md) for details.
 __A simple function to join two PS objects based on an identic key.__  
 The key must exists on both objects. After join returns the two objects as one.
 
+### Screenshoots
 
+![ConvertFrom-TextTable.001.jpg](images/Join-Objects-1.png)
 
 ## Rename NoteProperty of objects
 
@@ -72,9 +74,14 @@ __This function loads a credential, if it does not exist it is created.__
 
 ## Get Custom Hash
 
-__This function create a hash from string.__  
+__This function creates a hash from string.__  
 Simple helper, because PowerShell does not provide a cmdlet to compute the hash of a string.  
 [https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4)
+
+
+### Screenshoots
+
+![ConvertFrom-TextTable.001.jpg](images/Get-CustomHash-1.png)
 
 
 ## Get Custom Password

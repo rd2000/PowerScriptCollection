@@ -7,7 +7,7 @@ $IncPath = "..\functions\"
 Write-Host "This is a test for function: Get-CustomHash.ps1" -ForegroundColor Blue
 
 # First: Check, if the function has been changed since the last test
-if ((Get-FileHash -Path ".\functions\Get-CustomHash.ps1" -Algorithm 'MD5').Hash -ne "649812437DEE98B6E58F4449D2F5841B") {
+if ((Get-FileHash -Path "..\functions\Get-CustomHash.ps1" -Algorithm 'MD5').Hash -ne "3C203E652361A275ABE390BDF43D6FA9") {
     Write-Warning "Function has been modified since the last test!"
     Write-Host "If test passed, please adjust the checksum of the function to disable this warning."
 }

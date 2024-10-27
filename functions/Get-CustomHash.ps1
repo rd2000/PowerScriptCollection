@@ -4,7 +4,7 @@ function Get-CustomHash {
         Create hash from string
 
         .DESCRIPTION
-        This function create a hash from string.
+        This function creates a hash from string.
         Simple helper, because PowerShell does not provide a cmdlet to compute the hash of a string.
         See: <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4>
 
