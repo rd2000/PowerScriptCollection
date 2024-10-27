@@ -1,10 +1,3 @@
-<style>H1{color:#6495ED;}</style>
-<style>a:link{color:#6495ED;}</style>
-<style>a:visited{color:#6495ED;}</style>
-<style>a:hover{color:#888;}</style>
-<style>strong{color:#6495ED;}</style>
-
-
 # PowerScriptCollection 
 
 A custom collection of powershell functions, scripts and code snippets.  
