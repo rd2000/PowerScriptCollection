@@ -4,9 +4,9 @@ __A custom collection of powershell functions, scripts and code snippets.__
 
 I firmly believe that structured data can be incredibly useful, providing solutions and improvements for both personal and professional tasks. With just a few PowerShell functions, I have been able to achieve this efficiently.  
 
-One of the key tools is ConvertFrom-TextTable, which excels at transforming unstructured data into structured, machine-readable formats. Additionally, Join-Objects and Rename-NoteProperty help me merge objects and standardize object properties, ensuring consistency.  
+One of the key tools is [ConvertFrom-TextTable](#convert-texttable-to-object), which excels at transforming unstructured data into structured, machine-readable formats. Additionally, [Join-Objects](#join-powershell-objects) and [Rename-NoteProperty](#rename-noteproperty-of-objects) help me merge objects and standardize object properties, ensuring consistency.  
 
-Perhaps the most practical and effective function I’ve developed is ConvertTo-MSSQL.  
+Perhaps the most __practical and effective__ function I’ve developed is [ConvertTo-MSSQL](#convert-objects-to-mssql) .  
 It allows me to store all this valuable data in SQL databases, where the truly interesting data analysis begins.
 
 
