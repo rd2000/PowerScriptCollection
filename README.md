@@ -51,6 +51,9 @@ based on the defined start positions and lengths specified in a JSON string.
 The function removes the specified header lines and returns a list of
 PowerShell objects containing the extracted data.
 
+### Screenshoots
+![ConvertFrom-TextTable.001.jpg](images\ConvertFrom-TextTable.001.jpg)
+
 
 
 ## Get Custom Credential
