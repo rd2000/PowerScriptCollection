@@ -25,8 +25,14 @@ A custom collection of powershell functions, scripts and code snippets.
 ## Convert Objects to MSSQL
 
 __A generic function for converting Powershell objects into MSSQL statements.__  
-Convert a PowerShell object to microsoft structured query language. (MSSQL)
+Convert a PowerShell object to microsoft structured query language. (MSSQL)  
 
+See [documentation](docs/ConvertTo-MSSQL.md) for details.
+
+
+### Screenshoots
+
+![ConvertFrom-TextTable.001.jpg](images/ConvertTo-MSSQL.webp)
 
 
 ## Join PowerShell Objects
@@ -49,6 +55,9 @@ This function reads a formatted text table and extracts the data it contains
 based on the defined start positions and lengths specified in a JSON string.
 The function removes the specified header lines and returns a list of
 PowerShell objects containing the extracted data.
+
+See [documentation](docs/ConvertFrom-TextTable.md) for details.
+
 
 ### Screenshoots
 

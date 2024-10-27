@@ -1,8 +1,5 @@
 <#  
-    example.001.ps1
-    
-    ConvertTo-MSSQL.ps1
-    
+    ConvertTo-MSSQL.example.001.ps1
 #> 
 
 Set-Location -Path $PSScriptRoot
