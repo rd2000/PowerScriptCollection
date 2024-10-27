@@ -1,3 +1,10 @@
+<style>H1{color:#6495ED;}</style>
+<style>a:link{color:#6495ED;}</style>
+<style>a:visited{color:#6495ED;}</style>
+<style>a:hover{color:#888;}</style>
+<style>strong{color:#6495ED;}</style>
+
+
 # PowerScriptCollection 
 
 A custom collection of powershell functions, scripts and code snippets.  
@@ -41,7 +48,6 @@ The key must exists on both objects. After join returns the two objects as one.
 __A function to rename one or multiple NoteProperty of objects.__
 
 
-
 ## Convert texttable to object
 
 __Converts a text table into an array of PowerShell objects.__  
@@ -52,8 +58,8 @@ The function removes the specified header lines and returns a list of
 PowerShell objects containing the extracted data.
 
 ### Screenshoots
-![ConvertFrom-TextTable.001.jpg](images/ConvertFrom-TextTable.001.jpg)
 
+![ConvertFrom-TextTable.001.jpg](images/ConvertFrom-TextTable.webp)
 
 
 ## Get Custom Credential
@@ -64,20 +70,20 @@ __This function loads a credential, if it does not exist it is created.__
 
 ## Get Custom Hash
 
-__This function create a hash from string.__
-Simple helper, because PowerShell does not provide a cmdlet to compute the hash of a string.
+__This function create a hash from string.__  
+Simple helper, because PowerShell does not provide a cmdlet to compute the hash of a string.  
 [https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4)
 
 
 ## Get Custom Password
 
-__This function loads a custom password, if it does not exist it is created.__
-If commands do not support credentials, this function can be used to provide plain text passwords. 
+__This function loads a custom password, if it does not exist it is created.__  
+If commands do not support credentials, this function can be used to provide plain text passwords.  
 The password is still only saved in encrypted form.
 
 ---
 
 ## WebDav File Downloader
 
-__Power Script Collection - WebDav File Downloader__
+__Power Script Collection - WebDav File Downloader__  
 Download images (jpg, png) from WebDav resource and store the images to a local directory
