@@ -97,6 +97,8 @@ Straße   : Brunnenstraße 15
 
 ### A more complex example
 
+In this example, perhaps the advantage of converting from a simple text table to an object becomes more obvious. More extensive operations can be carried out with the data in the object. Here we simply add up the total sales by category.
+
 ```powershell
 <#  
     example.002.ps1
