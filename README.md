@@ -23,6 +23,8 @@ It allows me to store all this valuable data in SQL databases, where the truly i
 [Get Custom Credential](#get-custom-credential)  
 [Get Custom Hash](#get-custom-hash)  
 [Get Custom Password](#get-custom-password)  
+[Convert Hex Columns to Decimal](#convert-hex-columns-to-decimal)  
+
 
 ### Scripts
 
@@ -97,6 +99,12 @@ Simple helper, because PowerShell does not provide a cmdlet to compute the hash 
 __This function loads a custom password, if it does not exist it is created.__  
 If commands do not support credentials, this function can be used to provide plain text passwords.  
 The password is still only saved in encrypted form.
+
+## Convert Hex Columns to Decimal
+
+__Converts specified hex columns in a data array to decimal format.__
+This function accepts an array of PowerShell objects and a list of column names containing hexadecimal values.  
+It converts the specified hexadecimal columns to decimal format without modifying the original data.
 
 ---
 
