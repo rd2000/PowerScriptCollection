@@ -1,26 +1,25 @@
-﻿function Get-CustomCredential {
-    <#
-        .SYNOPSIS
-        Get a credential
+﻿<#
+    .SYNOPSIS
+    Get a credential
 
-        .DESCRIPTION
-        This function loads a credential, if it does not exist it is created.
-        
-        .PARAMETER Path
-        Path from which the credential is loaded or where it is saved.
-
-        .PARAMETER Username
-        The username for credential
-
-        .PARAMETER Prefix
-        Optional a prefix for credential (Default: cred_)
+    .DESCRIPTION
+    This function loads a credential, if it does not exist it is created.
     
-        .EXAMPLES
-        PS> $cred = Get-CustomCredential -Path "C:\Path\To\creds\" -Username "username"
-        PS> $cred = Get-CustomCredential -Path "C:\Path\To\creds\" -Username "username" -Prefix "MYPref"
-        PS> $cred = Get-CustomCredential -Path $env:APPDATA"\creds\" -Username $env:USERNAME
-    #>
+    .PARAMETER Path
+    Path from which the credential is loaded or where it is saved.
 
+    .PARAMETER Username
+    The username for credential
+
+    .PARAMETER Prefix
+    Optional a prefix for credential (Default: cred_)
+
+    .EXAMPLES
+    PS> $cred = Get-CustomCredential -Path "C:\Path\To\creds\" -Username "username"
+    PS> $cred = Get-CustomCredential -Path "C:\Path\To\creds\" -Username "username" -Prefix "MYPref"
+    PS> $cred = Get-CustomCredential -Path $env:APPDATA"\creds\" -Username $env:USERNAME
+#>
+function Get-CustomCredential {
     param
     (
         [Parameter(Mandatory=$true)]

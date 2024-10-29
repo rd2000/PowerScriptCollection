@@ -1,38 +1,36 @@
+<#
+    .SYNOPSIS
+    Rename one or multiple NoteProperty of objects.
+
+    .DESCRIPTION
+    Rename one or multiple NoteProperty of objects.
+
+    .PARAMETER objects
+    Specifies the object for NoteProperty renaming
+
+    .PARAMETER oldNames
+    One or multible Key names for search
+
+    .PARAMETER newNames
+    One or multible Key names for replace
+    Count of keys must be identic to oldNames
+
+    .PARAMETER WarnIfNotFound
+    Optional: Warning, if the key for the renaming does not exist
+
+    .INPUTS
+    None. You cannot pipe objects to Add-Extension.
+
+    .OUTPUTS
+    System.Object. Returns the object with renamed NoteProperty.
+
+    .EXAMPLE
+    PS> #Rename-NoteProperty -objects $myArray -oldNames @('Ports', 'Names', 'Location') -newNames @('Port', 'Name', 'Standort')
+    PS> #Rename-NoteProperty -objects $myArray -oldNames 'Ports', 'Names' -newNames 'aPort', 'aName' -WarnIfNotFound $true
+    PS> #Rename-NoteProperty -objects $myArray -oldNames 'Ports', 'Names' -newNames 'aPort', 'aName'
+    PS> Rename-NoteProperty -objects $myArray -oldNames 'Ports' -newNames 'Port' -WarnIfNotFound $true
+#>
 function Rename-NoteProperty {
-
-    <#
-        .SYNOPSIS
-        Rename one or multiple NoteProperty of objects.
-
-        .DESCRIPTION
-        Rename one or multiple NoteProperty of objects.
-
-        .PARAMETER objects
-        Specifies the object for NoteProperty renaming
-
-        .PARAMETER oldNames
-        One or multible Key names for search
-
-        .PARAMETER newNames
-        One or multible Key names for replace
-        Count of keys must be identic to oldNames
-
-        .PARAMETER WarnIfNotFound
-        Optional: Warning, if the key for the renaming does not exist
-
-        .INPUTS
-        None. You cannot pipe objects to Add-Extension.
-
-        .OUTPUTS
-        System.Object. Returns the object with renamed NoteProperty.
-
-        .EXAMPLE
-        PS> #Rename-NoteProperty -objects $myArray -oldNames @('Ports', 'Names', 'Location') -newNames @('Port', 'Name', 'Standort')
-        PS> #Rename-NoteProperty -objects $myArray -oldNames 'Ports', 'Names' -newNames 'aPort', 'aName' -WarnIfNotFound $true
-        PS> #Rename-NoteProperty -objects $myArray -oldNames 'Ports', 'Names' -newNames 'aPort', 'aName'
-        PS> Rename-NoteProperty -objects $myArray -oldNames 'Ports' -newNames 'Port' -WarnIfNotFound $true
-    #>
-
     param (
         [Parameter(Mandatory = $true)]
         [array]$objects,

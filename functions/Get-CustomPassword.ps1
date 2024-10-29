@@ -1,45 +1,44 @@
-﻿function Get-CustomPassword {
-    <#
-        .SYNOPSIS
-        Get-CustomPassword
+﻿<#
+    .SYNOPSIS
+    Get-CustomPassword
 
-        .DESCRIPTION
-        This function loads a custom password, if it does not exist it is created.
-        If commands do not support credentials, this function can be used to provide plain text passwords. 
-        The password is still only saved in encrypted form.
-        
-        .PARAMETER Path
-        Path from which the password is loaded or where it is saved.
-
-        .PARAMETER Filename
-        The passwords filename
-
-        .PARAMETER Username
-        Optional
-
-        .PARAMETER Password
-        Optional
-
-        .PARAMETER Prefix
-        Optional a prefix for password (Default: pass_)
+    .DESCRIPTION
+    This function loads a custom password, if it does not exist it is created.
+    If commands do not support credentials, this function can be used to provide plain text passwords. 
+    The password is still only saved in encrypted form.
     
-        .EXAMPLES
-        PS> $pass = Get-CustomPassword -Path "C:\Path\To\pass\" -Filename "John"
-        PS> $pass = Get-CustomPassword -Path "C:\Path\To\pass\" -Filename "Joe" -Username "JoeJack" -Password "Isja1781sdjS"
-        PS> $pass
+    .PARAMETER Path
+    Path from which the password is loaded or where it is saved.
 
-            Username                     Password PlainPassword
-            --------                     -------- -------------
-            JoeJack  System.Security.SecureString Isja1781sdjS 
+    .PARAMETER Filename
+    The passwords filename
 
-        PS> $loadpass = Get-CustomPassword -Path "C:\Path\To\pass\" -Filename "Joe" -Username "JoeJack"
-        PS> $loadpass
+    .PARAMETER Username
+    Optional
 
-            Username                     Password PlainPassword
-            --------                     -------- -------------
-            JoeJack  System.Security.SecureString Isja1781sdjS 
-    #>    
+    .PARAMETER Password
+    Optional
 
+    .PARAMETER Prefix
+    Optional a prefix for password (Default: pass_)
+
+    .EXAMPLES
+    PS> $pass = Get-CustomPassword -Path "C:\Path\To\pass\" -Filename "John"
+    PS> $pass = Get-CustomPassword -Path "C:\Path\To\pass\" -Filename "Joe" -Username "JoeJack" -Password "Isja1781sdjS"
+    PS> $pass
+
+        Username                     Password PlainPassword
+        --------                     -------- -------------
+        JoeJack  System.Security.SecureString Isja1781sdjS 
+
+    PS> $loadpass = Get-CustomPassword -Path "C:\Path\To\pass\" -Filename "Joe" -Username "JoeJack"
+    PS> $loadpass
+
+        Username                     Password PlainPassword
+        --------                     -------- -------------
+        JoeJack  System.Security.SecureString Isja1781sdjS 
+#>  
+function Get-CustomPassword {
     param (
         [Parameter(Mandatory=$true)]
         $Path,

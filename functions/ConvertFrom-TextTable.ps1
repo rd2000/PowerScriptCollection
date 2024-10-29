@@ -1,57 +1,56 @@
-﻿function ConvertFrom-TextTable {
-    <#
-        .SYNOPSIS
-        Converts a text table into an array of PowerShell objects.
+﻿<#
+    .SYNOPSIS
+    Converts a text table into an array of PowerShell objects.
 
-        .DESCRIPTION
-        This function reads a formatted text table and extracts the data it contains
-        based on the defined start positions and lengths specified in a JSON string.
-        The function removes the specified header lines and returns a list of
-        PowerShell objects containing the extracted data.
-        
-        .PARAMETER textTable
-        A multi-line string representing the text table. This table should be in a
-        fixed format where columns are structured by spaces or other delimiters.
+    .DESCRIPTION
+    This function reads a formatted text table and extracts the data it contains
+    based on the defined start positions and lengths specified in a JSON string.
+    The function removes the specified header lines and returns a list of
+    PowerShell objects containing the extracted data.
+    
+    .PARAMETER textTable
+    A multi-line string representing the text table. This table should be in a
+    fixed format where columns are structured by spaces or other delimiters.
 
-        .PARAMETER jsonString
-        A JSON string containing the configuration for data extraction. It should define
-        the header lines to be removed, as well as the start positions and lengths of the
-        columns to be extracted.
+    .PARAMETER jsonString
+    A JSON string containing the configuration for data extraction. It should define
+    the header lines to be removed, as well as the start positions and lengths of the
+    columns to be extracted.
 
-        .PARAMETER mapName
-        The JSON element Name, where JSON contain the extract datas.
+    .PARAMETER mapName
+    The JSON element Name, where JSON contain the extract datas.
 
-        .EXAMPLE
-        $textTable = @"
-        Vorname Nachname  PLZ   Ort       Straße
-        ------- --------  ---   ---       ------
-        John    Meier     10115 Berlin    Hauptstraße 12
-        "@
+    .EXAMPLE
+    $textTable = @"
+    Vorname Nachname  PLZ   Ort       Straße
+    ------- --------  ---   ---       ------
+    John    Meier     10115 Berlin    Hauptstraße 12
+    "@
 
-        $jsonString = @"
-        {
-            "tableaddresses": {
-                "removelines": {
-                    "header": 2
-                },
-                "extract": {
-                    "Vorname": { "start": 1, "length": 10 },
-                    "Nachname": { "start": 13, "length": 10 },
-                    "PLZ": { "start": 25, "length": 6 },
-                    "Ort": { "start": 32, "length": 15 },
-                    "Straße": { "start": 48, "length": 18 }
-                }
+    $jsonString = @"
+    {
+        "tableaddresses": {
+            "removelines": {
+                "header": 2
+            },
+            "extract": {
+                "Vorname": { "start": 1, "length": 10 },
+                "Nachname": { "start": 13, "length": 10 },
+                "PLZ": { "start": 25, "length": 6 },
+                "Ort": { "start": 32, "length": 15 },
+                "Straße": { "start": 48, "length": 18 }
             }
         }
-        "@
+    }
+    "@
 
-        $result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString -mapName "tableaddresses"
-        $result | Format-Table -AutoSize
+    $result = ConvertFrom-TextTable -textTable $textTable -jsonString $jsonString -mapName "tableaddresses"
+    $result | Format-Table -AutoSize
 
-        This would convert the table into an array of PowerShell objects containing the
-        extracted data.
-    #>
-        
+    This would convert the table into an array of PowerShell objects containing the
+    extracted data.
+#>
+function ConvertFrom-TextTable {        
     param (
         [Parameter(Mandatory = $true)]
         [string]$textTable,

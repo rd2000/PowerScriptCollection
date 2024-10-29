@@ -1,31 +1,30 @@
-function Join-Objects {
+ <#
+    .SYNOPSIS
+    Join Objects based on a key.
+
+    .DESCRIPTION
+    Join two PS Objects based on an identic key.
+
+    .PARAMETER left
+    Specifies the left input oject
+
+    .PARAMETER right
+    Specifies the right input oject
+
+    .PARAMETER key
+    Specifies the keyname column. The key must exists on both objects. 
     
-    <#
-        .SYNOPSIS
-        Join Objects based on a key.
+    .INPUTS
+    None. You cannot pipe objects to Add-Extension.
 
-        .DESCRIPTION
-        Join two PS Objects based on an identic key.
+    .OUTPUTS
+    System.Object. Returns the two joined objects as one.
 
-        .PARAMETER left
-        Specifies the left input oject
-
-        .PARAMETER right
-        Specifies the right input oject
-
-        .PARAMETER key
-        Specifies the keyname column. The key must exists on both objects. 
-        
-        .INPUTS
-        None. You cannot pipe objects to Add-Extension.
-
-        .OUTPUTS
-        System.Object. Returns the two joined objects as one.
-
-        .EXAMPLE
-        PS> # Join $left object and $right object based on key 'ID' 
-        $joined = Join-Objects -left $left -right $right -key 'ID'
-    #>
+    .EXAMPLE
+    PS> # Join $left object and $right object based on key 'ID' 
+    $joined = Join-Objects -left $left -right $right -key 'ID'
+#>
+function Join-Objects {
     param (
         [Parameter(Mandatory = $true)]
         [array]$left,
