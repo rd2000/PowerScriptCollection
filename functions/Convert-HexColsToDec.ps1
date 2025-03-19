@@ -6,10 +6,10 @@
         This function accepts an array of PowerShell objects and a list of column names containing hexadecimal values.
         It converts the specified hexadecimal columns to decimal format without modifying the original data.
 
-    .PARAMETER Daten
+    .PARAMETER Datas
         Array of objects containing the data to be converted.
 
-    .PARAMETER HexSpalten
+    .PARAMETER HexCols
         Array of column names with hexadecimal values to be converted to decimal.
 
     .RETURNS

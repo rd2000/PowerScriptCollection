@@ -24,7 +24,7 @@ It allows me to store all this valuable data in SQL databases, where the truly i
 [Get Custom Hash](#get-custom-hash)  
 [Get Custom Password](#get-custom-password)  
 [Convert Hex Columns to Decimal](#convert-hex-columns-to-decimal)  
-
+[Compress File to Gzip](#compress-file-to-gzip)  
 
 ### Scripts
 
@@ -112,3 +112,11 @@ It converts the specified hexadecimal columns to decimal format without modifyin
 
 __Power Script Collection - WebDav File Downloader__  
 Download images (jpg, png) from WebDav resource and store the images to a local directory
+
+
+---
+
+## Compress File to Gzip
+
+__Compress file to gzip file__
+Compresses a file in gizp in the same directory. Optionally, you can create the gzip file in a different directory.
