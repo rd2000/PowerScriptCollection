@@ -25,7 +25,7 @@ function Compress-Gzip {
 
     # Check if the input file exists
     if (-Not (Test-Path $InputFile -PathType Leaf)) {
-        Write-Error "Die Datei '$InputFile' wurde nicht gefunden."
+        Write-Error "File '$InputFile' not found."
         return
     }
 
