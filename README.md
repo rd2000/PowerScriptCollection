@@ -25,6 +25,7 @@ It allows me to store all this valuable data in SQL databases, where the truly i
 [Get Custom Password](#get-custom-password)  
 [Convert Hex Columns to Decimal](#convert-hex-columns-to-decimal)  
 [Compress File to Gzip](#compress-file-to-gzip)  
+[Expand SqlTemplate](#expand-sqltemplate)
 
 ### Scripts
 
@@ -120,3 +121,11 @@ Download images (jpg, png) from WebDav resource and store the images to a local 
 
 __Compress file to gzip file__
 Compresses a file in gizp in the same directory. Optionally, you can create the gzip file in a different directory.
+
+
+---
+
+## Expand SqlTemplate
+
+__Loads a SQL file and replaces placeholders with variable values.__
+This function reads a SQL template file and replaces placeholders of the form {{PLACEHOLDER}} with corresponding values from a hashtable provided via the -Variables parameter.
