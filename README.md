@@ -25,7 +25,10 @@ It allows me to store all this valuable data in SQL databases, where the truly i
 [Get Custom Password](#get-custom-password)  
 [Convert Hex Columns to Decimal](#convert-hex-columns-to-decimal)  
 [Compress File to Gzip](#compress-file-to-gzip)  
-[Expand SqlTemplate](#expand-sqltemplate)
+[Expand SqlTemplate](#expand-sqltemplate)  
+[Get Custom SecretStore](#get-custom-secretstore)  
+
+
 
 ### Scripts
 
@@ -129,3 +132,12 @@ Compresses a file in gizp in the same directory. Optionally, you can create the 
 
 __Loads a SQL file and replaces placeholders with variable values.__
 This function reads a SQL template file and replaces placeholders of the form {{PLACEHOLDER}} with corresponding values from a hashtable provided via the -Variables parameter.
+
+---
+
+## Get Custom SecretStore
+
+__Loads a custom configuration/secret object from CLIXML, or creates it if it does not exist. It can contain multiple fields/properties.__
+Supports arbitrary fields (e.g., ApiUrl, ApiToken, Username, Password, Tenant, etc.).
+Selected fields can be stored as SecureString (encrypted in CLIXML on Windows in the current user context).
+This function is useful for storing tokens or other sensitive values, as well as general configuration data.
