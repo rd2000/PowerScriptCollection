@@ -1,14 +1,26 @@
-# PowerScriptCollection 
+# PowerScriptCollection
 
-__A custom collection of powershell functions, scripts and code snippets.__  
+**A custom collection of PowerShell functions, scripts, and code snippets.**
 
-I firmly believe that structured data can be incredibly useful, providing solutions and improvements for both personal and professional tasks. With just a few PowerShell functions, I have been able to achieve this efficiently.  
+This repository focuses on practical PowerShell utilities for transforming data, joining objects, managing secrets, and preparing data for further analysis.
 
-One of the key tools is [ConvertFrom-TextTable](#convert-texttable-to-object), which excels at transforming unstructured data into structured, machine-readable formats. Additionally, [Join-Objects](#join-powershell-objects) and [Rename-NoteProperty](#rename-noteproperty-of-objects) help me merge objects and standardize object properties, ensuring consistency.  
+One key tool is [ConvertFrom-TextTable](#convert-texttable-to-object), which transforms unstructured text tables into structured objects.  
+[Join-Objects](#join-powershell-objects) and [Rename-NoteProperty](#rename-noteproperty-of-objects) help merge and standardize object data.  
+[ConvertTo-MSSQL](#convert-objects-to-mssql) supports storing object data in SQL Server for deeper analysis.
 
-Perhaps the most __practical and effective__ function I’ve developed is [ConvertTo-MSSQL](#convert-objects-to-mssql) .  
-It allows me to store all this valuable data in SQL databases, where the truly interesting data analysis begins.
+---
 
+## Quickstart
+
+```powershell
+# From repository root
+. .\functions\Join-Objects.ps1
+
+$left = @([pscustomobject]@{ ID = 1; Name = "John" })
+$right = @([pscustomobject]@{ ID = 1; Age = 30 })
+
+Join-Objects -left $left -right $right -key 'ID'
+```
 
 ---
 
@@ -16,128 +28,111 @@ It allows me to store all this valuable data in SQL databases, where the truly i
 
 ### Functions
 
-[Convert Objects to MSSQL](#convert-objects-to-mssql)  
-[Join PowerShell Objects](#join-powershell-objects)  
-[Rename NoteProperty of Objects](#rename-noteproperty-of-objects)  
-[Convert TextTable to Object](#convert-texttable-to-object)  
-[Get Custom Credential](#get-custom-credential)  
-[Get Custom Hash](#get-custom-hash)  
-[Get Custom Password](#get-custom-password)  
-[Convert Hex Columns to Decimal](#convert-hex-columns-to-decimal)  
-[Compress File to Gzip](#compress-file-to-gzip)  
-[Expand SqlTemplate](#expand-sqltemplate)  
-[Get Custom SecretStore](#get-custom-secretstore)  
-
-
+- [Convert Objects to MSSQL](#convert-objects-to-mssql)
+- [Join PowerShell Objects](#join-powershell-objects)
+- [Rename NoteProperty of Objects](#rename-noteproperty-of-objects)
+- [Convert TextTable to Object](#convert-texttable-to-object)
+- [Get Custom Credential](#get-custom-credential)
+- [Get Custom Hash](#get-custom-hash)
+- [Get Custom Password](#get-custom-password)
+- [Convert Hex Columns to Decimal](#convert-hex-columns-to-decimal)
+- [Compress File to Gzip](#compress-file-to-gzip)
+- [Expand SQL Template](#expand-sqltemplate)
+- [Get Custom SecretStore](#get-custom-secretstore)
 
 ### Scripts
 
-[WebDav File Downloader](#webdav-file-downloader)  
+- [WebDAV File Downloader](#webdav-file-downloader)
 
 ---
 
 ## Convert Objects to MSSQL
 
-__A generic function for converting Powershell objects into MSSQL statements.__  
-Convert a PowerShell object to microsoft structured query language. (MSSQL)  
+**A generic function for converting PowerShell objects into MSSQL statements.**  
+Converts PowerShell objects to Microsoft SQL Server statements.
 
 See [documentation](docs/ConvertTo-MSSQL.md) for details.
 
+### Screenshot
 
-### Screenshoots
-
-![ConvertFrom-TextTable.001.jpg](images/ConvertTo-MSSQL.webp)
-
+![ConvertTo-MSSQL screenshot](images/ConvertTo-MSSQL.webp)
 
 ## Join PowerShell Objects
 
-__A simple function to join two PS objects based on an identic key.__  
-The key must exists on both objects. After join returns the two objects as one.
+**A simple function to join two PowerShell objects based on a matching key.**  
+The key must exist on both objects. The function returns merged objects.
 
-### Screenshoots
+See [documentation](docs/Join-Objects.md) for details.
 
-![ConvertFrom-TextTable.001.jpg](images/Join-Objects-1.png)
+### Screenshot
 
-## Rename NoteProperty of objects
+![Join-Objects screenshot](images/Join-Objects-1.png)
 
-__A function to rename one or multiple NoteProperty of objects.__
+## Rename NoteProperty of Objects
 
+**A function to rename one or multiple NoteProperty fields on objects.**
 
-## Convert texttable to object
+See [documentation](docs/Rename-NoteProperty.md) for details.
 
-__Converts a text table into an array of PowerShell objects.__  
+## Convert TextTable to Object
 
-This function reads a formatted text table and extracts the data it contains
-based on the defined start positions and lengths specified in a JSON string.
-The function removes the specified header lines and returns a list of
-PowerShell objects containing the extracted data.
+**Converts a text table into an array of PowerShell objects.**
+
+This function reads a formatted text table and extracts data based on defined start positions and lengths provided in a JSON string.  
+The function removes specified header lines and returns a list of PowerShell objects.
 
 See [documentation](docs/ConvertFrom-TextTable.md) for details.
 
+### Screenshot
 
-### Screenshoots
-
-![ConvertFrom-TextTable.001.jpg](images/ConvertFrom-TextTable.webp)
-
+![ConvertFrom-TextTable screenshot](images/ConvertFrom-TextTable.webp)
 
 ## Get Custom Credential
 
-__This function loads a credential, if it does not exist it is created.__
-
-
+**Loads a credential, or creates it if it does not exist.**
 
 ## Get Custom Hash
 
-__This function creates a hash from string.__  
-Simple helper, because PowerShell does not provide a cmdlet to compute the hash of a string.  
-[https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4)
+**Creates a hash from a string.**  
+Helper function because PowerShell does not provide a built-in cmdlet to compute a hash directly from a string.
 
+Reference: [Get-FileHash](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4)
 
-### Screenshoots
+### Screenshot
 
-![ConvertFrom-TextTable.001.jpg](images/Get-CustomHash-1.png)
-
+![Get-CustomHash screenshot](images/Get-CustomHash-1.png)
 
 ## Get Custom Password
 
-__This function loads a custom password, if it does not exist it is created.__  
-If commands do not support credentials, this function can be used to provide plain text passwords.  
-The password is still only saved in encrypted form.
+**Loads a custom password, or creates it if it does not exist.**  
+Useful when commands do not support credentials directly.  
+The password is stored in encrypted form.
 
 ## Convert Hex Columns to Decimal
 
-__Converts specified hex columns in a data array to decimal format.__
-This function accepts an array of PowerShell objects and a list of column names containing hexadecimal values.  
-It converts the specified hexadecimal columns to decimal format without modifying the original data.
+**Converts specified hex columns in an object array to decimal format.**  
+Accepts an array of PowerShell objects and a list of column names containing hexadecimal values.  
+Converts the selected columns without modifying the original input array.
 
----
+## WebDAV File Downloader
 
-## WebDav File Downloader
-
-__Power Script Collection - WebDav File Downloader__  
-Download images (jpg, png) from WebDav resource and store the images to a local directory
-
-
----
+**PowerScriptCollection - WebDAV File Downloader**  
+Downloads image files (JPG, PNG) from a WebDAV resource to a local directory.
 
 ## Compress File to Gzip
 
-__Compress file to gzip file__
-Compresses a file in gizp in the same directory. Optionally, you can create the gzip file in a different directory.
-
-
----
+**Compresses a file to Gzip format.**  
+By default, creates the `.gz` file in the same directory as the source file.  
+Optionally writes the output file to a different target path.
 
 ## Expand SqlTemplate
 
-__Loads a SQL file and replaces placeholders with variable values.__
-This function reads a SQL template file and replaces placeholders of the form {{PLACEHOLDER}} with corresponding values from a hashtable provided via the -Variables parameter.
-
----
+**Loads a SQL file and replaces placeholders with variable values.**  
+Reads a SQL template file and replaces placeholders of the form `{{PLACEHOLDER}}` with matching values from the `-Variables` hashtable.
 
 ## Get Custom SecretStore
 
-__Loads a custom configuration/secret object from CLIXML, or creates it if it does not exist. It can contain multiple fields/properties.__
-Supports arbitrary fields (e.g., ApiUrl, ApiToken, Username, Password, Tenant, etc.).
-Selected fields can be stored as SecureString (encrypted in CLIXML on Windows in the current user context).
-This function is useful for storing tokens or other sensitive values, as well as general configuration data.
+**Loads a custom configuration/secret object from CLIXML, or creates it if it does not exist.**  
+Supports arbitrary fields (for example: `ApiUrl`, `ApiToken`, `Username`, `Password`, `Tenant`).  
+Selected fields can be stored as `SecureString` values (encrypted in CLIXML on Windows in the current user context).  
+Useful for API tokens, passwords, and general configuration data.
