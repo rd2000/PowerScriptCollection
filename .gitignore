@@ -1,3 +1,13 @@
 own/
 todo/
 tmp/
+
+# Generated executables
+Tools/exe/*
+!Tools/exe/.gitkeep
+
+# Third-party binaries and generated Base64 artifacts
+Tools/thirdparty/bin/*
+!Tools/thirdparty/bin/readme.md
+Tools/thirdparty/b64/*
+!Tools/thirdparty/b64/.gitkeep
