@@ -6,6 +6,11 @@ tmp/
 Tools/exe/*
 !Tools/exe/.gitkeep
 
+# Local router configuration
+Tools/config/*
+!Tools/config/.gitkeep
+!Tools/config/routers.example.json
+
 # Third-party binaries and generated Base64 artifacts
 Tools/thirdparty/bin/*
 !Tools/thirdparty/bin/readme.md

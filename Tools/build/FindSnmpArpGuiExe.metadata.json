@@ -1,0 +1,7 @@
+{
+  "title": "Find SNMP ARP GUI",
+  "description": "GUI-Tool zum Ermitteln von ARP-Informationen per SNMP.",
+  "company": "PowerScriptCollection",
+  "version": "1.0.0.0",
+  "product": "PowerScriptCollection Tools"
+}

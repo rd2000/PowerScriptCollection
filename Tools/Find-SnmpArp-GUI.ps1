@@ -95,8 +95,9 @@ function Write-Base64File {
 
 function Get-ApplicationBaseDirectories {
     $directories = New-Object 'System.Collections.Generic.List[string]'
+    $currentDirectory = (Get-Location).Path
 
-    foreach ($path in @($PSScriptRoot, $PSCommandPath, [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)) {
+    foreach ($path in @($PSScriptRoot, $PSCommandPath, $currentDirectory, [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)) {
         if ([string]::IsNullOrWhiteSpace($path)) {
             continue
         }
@@ -109,6 +110,11 @@ function Get-ApplicationBaseDirectories {
 
             if (-not [string]::IsNullOrWhiteSpace($directory) -and -not $directories.Contains($directory)) {
                 $directories.Add($directory)
+            }
+
+            $toolsDirectory = Join-Path $directory "Tools"
+            if ((Test-Path -LiteralPath $toolsDirectory -PathType Container) -and -not $directories.Contains($toolsDirectory)) {
+                $directories.Add($toolsDirectory)
             }
         }
         catch {
@@ -141,6 +147,72 @@ function Resolve-SnmpBase64Directory {
     }
 
     throw "Net-SNMP-Base64-Dateien wurden nicht gefunden. Erwartet wird %LOCALAPPDATA%\SnmpArpGui\b64 oder Tools\thirdparty\b64 mit snmpwalk.exe.b64 und netsnmp.dll.b64."
+}
+
+function Resolve-RouterConfigDirectory {
+    # Beim direkten Start als .ps1 im Repository soll die gepflegte Projektdatei
+    # Vorrang vor einer eventuell aelteren eingebetteten EXE-Kopie haben.
+    foreach ($baseDir in (Get-ApplicationBaseDirectories)) {
+        $candidate = Join-Path $baseDir "config"
+
+        if (Test-Path -LiteralPath (Join-Path $candidate "routers.json")) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+
+    $embeddedDir = Join-Path $env:LOCALAPPDATA "SnmpArpGui\config"
+    if (Test-Path -LiteralPath (Join-Path $embeddedDir "routers.json")) {
+        return $embeddedDir
+    }
+
+    return $null
+}
+
+function Import-RouterConfigs {
+    $configDir = Resolve-RouterConfigDirectory
+    if ([string]::IsNullOrWhiteSpace($configDir)) {
+        return @()
+    }
+
+    $configPath = Join-Path $configDir "routers.json"
+    try {
+        $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+    }
+    catch {
+        throw "Router-Konfiguration konnte nicht gelesen werden: $configPath`r`n$($_.Exception.Message)"
+    }
+
+    $routerItems = @()
+    if ($config.PSObject.Properties.Name -contains "routers") {
+        $routerItems = @($config.routers)
+    }
+    elseif ($config -is [array]) {
+        $routerItems = @($config)
+    }
+    else {
+        throw "Router-Konfiguration muss ein JSON-Objekt mit 'routers' oder ein JSON-Array sein: $configPath"
+    }
+
+    $routers = foreach ($router in $routerItems) {
+        if (
+            [string]::IsNullOrWhiteSpace($router.name) -or
+            [string]::IsNullOrWhiteSpace($router.routerIp) -or
+            [string]::IsNullOrWhiteSpace($router.community) -or
+            [string]::IsNullOrWhiteSpace($router.oid)
+        ) {
+            continue
+        }
+
+        [PSCustomObject]@{
+            Name      = [string]$router.name
+            Subnet    = [string]$router.subnet
+            RouterIp  = [string]$router.routerIp
+            Community = [string]$router.community
+            OID       = [string]$router.oid
+        }
+    }
+
+    return @($routers)
 }
 
 function Initialize-SnmpTools {
@@ -211,6 +283,7 @@ function Convert-DataTableToObjects {
 
 try {
     $script:SnmpWalkPath = Initialize-SnmpTools
+    $script:RouterConfigs = Import-RouterConfigs
 }
 catch {
     [System.Windows.Forms.MessageBox]::Show(
@@ -223,6 +296,9 @@ catch {
 }
 
 $script:CurrentJob = $null
+if (-not $script:RouterConfigs) {
+    $script:RouterConfigs = @()
+}
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "SNMP ARP Suche"
@@ -232,17 +308,16 @@ $form.MinimumSize = New-Object System.Drawing.Size(900, 560)
 
 # Eingabefelder
 
-$form.Controls.Add((New-Label "Router-IP:" 20 20))
-$txtRouterIp = New-TextBox 140 18 180 "routername"
-$form.Controls.Add($txtRouterIp)
+$form.Controls.Add((New-Label "Router:" 20 20))
+$cmbRouter = New-Object System.Windows.Forms.ComboBox
+$cmbRouter.Location = New-Object System.Drawing.Point(140, 18)
+$cmbRouter.Size = New-Object System.Drawing.Size(300, 22)
+$cmbRouter.DropDownStyle = "DropDownList"
+$form.Controls.Add($cmbRouter)
 
-$form.Controls.Add((New-Label "Community:" 340 20))
-$txtCommunity = New-TextBox 460 18 120 "public"
-$form.Controls.Add($txtCommunity)
-
-$form.Controls.Add((New-Label "OID:" 600 20 50))
-$txtOid = New-TextBox 650 18 380 ".1.3.6.1.2.1.3.1.1.2"
-$form.Controls.Add($txtOid)
+$lblRouterSubnet = New-Label "" 460 20 570
+$lblRouterSubnet.AutoEllipsis = $true
+$form.Controls.Add($lblRouterSubnet)
 
 $form.Controls.Add((New-Label "IPv4 suchen:" 20 60))
 $txtIpSearch = New-TextBox 140 58 180
@@ -319,12 +394,39 @@ $status.Size = New-Object System.Drawing.Size(1040, 25)
 $status.Anchor = "Bottom,Left,Right"
 $form.Controls.Add($status)
 
+foreach ($router in $script:RouterConfigs) {
+    [void]$cmbRouter.Items.Add($router.Name)
+}
+
+$cmbRouter.Add_SelectedIndexChanged({
+    $selectedName = [string]$cmbRouter.SelectedItem
+    $selectedRouter = $script:RouterConfigs | Where-Object { $_.Name -eq $selectedName } | Select-Object -First 1
+
+    if ($selectedRouter) {
+        if ([string]::IsNullOrWhiteSpace($selectedRouter.Subnet)) {
+            $lblRouterSubnet.Text = "Subnet: -"
+        }
+        else {
+            $lblRouterSubnet.Text = "Subnet: $($selectedRouter.Subnet)"
+        }
+
+        $status.Text = "Bereit. Router: $($selectedRouter.Name)"
+    }
+})
+
+if ($cmbRouter.Items.Count -gt 0) {
+    $cmbRouter.SelectedIndex = 0
+}
+
 # Suche starten
 
 $btnStart.Add_Click({
-    if ([string]::IsNullOrWhiteSpace($txtRouterIp.Text)) {
+    $selectedName = [string]$cmbRouter.SelectedItem
+    $selectedRouter = $script:RouterConfigs | Where-Object { $_.Name -eq $selectedName } | Select-Object -First 1
+
+    if (-not $selectedRouter) {
         [System.Windows.Forms.MessageBox]::Show(
-            "Bitte eine Router-IP oder einen Routernamen eingeben.",
+            "Bitte einen Router aus der Konfiguration auswaehlen.",
             "Fehlende Eingabe",
             "OK",
             "Warning"
@@ -339,9 +441,9 @@ $btnStart.Add_Click({
     $status.Text = "SNMP-Abfrage laeuft..."
 
     $snmpWalkPath = $script:SnmpWalkPath
-    $routerIp     = $txtRouterIp.Text.Trim()
-    $community    = $txtCommunity.Text.Trim()
-    $oid          = $txtOid.Text.Trim()
+    $routerIp     = $selectedRouter.RouterIp
+    $community    = $selectedRouter.Community
+    $oid          = $selectedRouter.OID
     $ipSearch     = $txtIpSearch.Text.Trim()
     $macSearch    = $txtMacSearch.Text.Trim()
     $freeSearch   = $txtFreeSearch.Text.Trim()
