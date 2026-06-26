@@ -40,8 +40,9 @@ Join-Objects -left $left -right $right -key 'ID'
 - [Expand SQL Template](#expand-sqltemplate)
 - [Get Custom SecretStore](#get-custom-secretstore)
 
-### Scripts
+### Tools
 
+- [Find SNMP ARP GUI](#find-snmp-arp-gui)
 - [WebDAV File Downloader](#webdav-file-downloader)
 
 ---
@@ -114,10 +115,40 @@ The password is stored in encrypted form.
 Accepts an array of PowerShell objects and a list of column names containing hexadecimal values.  
 Converts the selected columns without modifying the original input array.
 
+## Find SNMP ARP GUI
+
+**A Windows Forms GUI for searching SNMP ARP tables.**  
+The tool uses Net-SNMP `snmpwalk` to query configured routers and displays matching ARP entries with IPv4 address, DNS name, and MAC address.
+
+Router definitions are stored in `Tools/config/routers.json`.  
+Each router entry contains the router name, subnet information for the user, router IP or DNS name, SNMP community, and OID.  
+The GUI shows only the router selection and the related subnet hint; technical SNMP connection values are read from the configuration file.
+
+Main features:
+
+- Select a router from `routers.json`
+- Show the configured subnet next to the router selection
+- Search by IPv4 address, MAC address, or free text
+- Optionally resolve DNS names
+- Export results to CSV
+- Copy selected result rows to the clipboard
+- Build a standalone EXE with `Tools/build/Build-FindSnmpArpGuiExe.ps1`
+
 ## WebDAV File Downloader
 
 **PowerScriptCollection - WebDAV File Downloader**  
-Downloads image files (JPG, PNG) from a WebDAV resource to a local directory.
+Downloads files from a WebDAV resource to a local directory.
+
+By default, the script is prepared for image downloads (`.jpg`, `.png`).  
+It authenticates with a stored credential from `Get-CustomCredential`, reads the remote WebDAV index, filters matching files, and downloads only files that have not been downloaded before.
+
+Main features:
+
+- Download JPG and PNG files from a WebDAV directory
+- Store files in a configurable local destination directory
+- Use saved credentials for authenticated WebDAV access
+- Keep a local link list to avoid downloading the same file again
+- Adapt the file filter for other file types if needed
 
 ## Compress File to Gzip
 
