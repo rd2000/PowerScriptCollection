@@ -1,6 +1,6 @@
 # Find-SnmpArp-GUI.ps1
 # GUI fuer SNMP-ARP-Suche mit ausgelagerten Net-SNMP-Base64-Dateien
-# Ausgabe: IPv4, DNSName, MAC
+# Ausgabe: IPv4, DNSName, MAC, Vendor
 
 # ---------------------------------------------------------------------------
 # Drittanbieter-Base64-Dateien
@@ -168,6 +168,62 @@ function Resolve-RouterConfigDirectory {
     return $null
 }
 
+function Resolve-MacVendorConfigPath {
+    # Beim direkten Start als .ps1 im Repository soll die gepflegte Projektdatei
+    # Vorrang vor einer eventuell aelteren eingebetteten EXE-Kopie haben.
+    foreach ($baseDir in (Get-ApplicationBaseDirectories)) {
+        $candidate = Join-Path $baseDir "config\macvendors.csv"
+
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+
+    $embeddedPath = Join-Path $env:LOCALAPPDATA "SnmpArpGui\config\macvendors.csv"
+    if (Test-Path -LiteralPath $embeddedPath -PathType Leaf) {
+        return $embeddedPath
+    }
+
+    return $null
+}
+
+function Import-MacVendorMap {
+    $vendorPath = Resolve-MacVendorConfigPath
+    $vendorMap = @{}
+
+    if ([string]::IsNullOrWhiteSpace($vendorPath)) {
+        return $vendorMap
+    }
+
+    try {
+        $vendors = Import-Csv -LiteralPath $vendorPath -Delimiter ';'
+
+        foreach ($vendor in $vendors) {
+            $shortMac = ""
+            $vendorName = ""
+
+            if ($vendor.PSObject.Properties.Name -contains "shortmac") {
+                $shortMac = [string]$vendor.shortmac
+            }
+
+            if ($vendor.PSObject.Properties.Name -contains "vendor") {
+                $vendorName = [string]$vendor.vendor
+            }
+
+            $prefix = ($shortMac -replace '[^0-9A-Fa-f]', '').ToUpper()
+
+            if ($prefix.Length -ge 6 -and -not [string]::IsNullOrWhiteSpace($vendorName)) {
+                $vendorMap[$prefix.Substring(0, 6)] = $vendorName.Trim()
+            }
+        }
+    }
+    catch {
+        throw "MAC-Vendor-Konfiguration konnte nicht gelesen werden: $vendorPath`r`n$($_.Exception.Message)"
+    }
+
+    return $vendorMap
+}
+
 function Import-RouterConfigs {
     $configDir = Resolve-RouterConfigDirectory
     if ([string]::IsNullOrWhiteSpace($configDir)) {
@@ -277,18 +333,52 @@ function Convert-DataTableToObjects {
             IPv4    = $row.IPv4
             DNSName = $row.DNSName
             MAC     = $row.MAC
+            Vendor  = $row.Vendor
         }
     }
+}
+
+function Convert-DataViewToObjects {
+    param(
+        [System.Data.DataView]$View
+    )
+
+    foreach ($rowView in $View) {
+        $row = $rowView.Row
+
+        [PSCustomObject]@{
+            IPv4    = $row.IPv4
+            DNSName = $row.DNSName
+            MAC     = $row.MAC
+            Vendor  = $row.Vendor
+        }
+    }
+}
+
+function ConvertTo-DataViewLikeValue {
+    param(
+        [AllowEmptyString()]
+        [string]$Value
+    )
+
+    $escapedValue = $Value.Replace("'", "''")
+    $escapedValue = $escapedValue.Replace("[", "[[]")
+    $escapedValue = $escapedValue.Replace("]", "[]]")
+    $escapedValue = $escapedValue.Replace("%", "[%]")
+    $escapedValue = $escapedValue.Replace("*", "[*]")
+
+    return $escapedValue
 }
 
 try {
     $script:SnmpWalkPath = Initialize-SnmpTools
     $script:RouterConfigs = Import-RouterConfigs
+    $script:MacVendorMap = Import-MacVendorMap
 }
 catch {
     [System.Windows.Forms.MessageBox]::Show(
         $_.Exception.Message,
-        "Fehler beim Initialisieren von snmpwalk",
+        "Fehler beim Initialisieren",
         "OK",
         "Error"
     ) | Out-Null
@@ -298,6 +388,9 @@ catch {
 $script:CurrentJob = $null
 if (-not $script:RouterConfigs) {
     $script:RouterConfigs = @()
+}
+if (-not $script:MacVendorMap) {
+    $script:MacVendorMap = @{}
 }
 
 $form = New-Object System.Windows.Forms.Form
@@ -338,6 +431,14 @@ $chkResolveDns.Size = New-Object System.Drawing.Size(140, 22)
 $chkResolveDns.Checked = $true
 $form.Controls.Add($chkResolveDns)
 
+$chkResolveVendor = New-Object System.Windows.Forms.CheckBox
+$chkResolveVendor.Text = "Vendor aufloesen"
+$chkResolveVendor.Location = New-Object System.Drawing.Point(735, 101)
+$chkResolveVendor.Size = New-Object System.Drawing.Size(150, 22)
+$chkResolveVendor.Checked = ($script:MacVendorMap.Count -gt 0)
+$chkResolveVendor.Enabled = ($script:MacVendorMap.Count -gt 0)
+$form.Controls.Add($chkResolveVendor)
+
 # Buttons
 
 $btnStart = New-Object System.Windows.Forms.Button
@@ -367,16 +468,23 @@ $btnCopy.Location = New-Object System.Drawing.Point(430, 95)
 $btnCopy.Size = New-Object System.Drawing.Size(140, 32)
 $form.Controls.Add($btnCopy)
 
+$form.Controls.Add((New-Label "Tabelle filtern:" 20 135))
+$txtTableSearch = New-TextBox 140 133 890
+$txtTableSearch.Anchor = "Top,Left,Right"
+$form.Controls.Add($txtTableSearch)
+
 # Tabelle
 
 $table = New-Object System.Data.DataTable
 [void]$table.Columns.Add("IPv4", [string])
 [void]$table.Columns.Add("DNSName", [string])
 [void]$table.Columns.Add("MAC", [string])
+[void]$table.Columns.Add("Vendor", [string])
+$tableView = New-Object System.Data.DataView -ArgumentList $table
 
 $grid = New-Object System.Windows.Forms.DataGridView
-$grid.Location = New-Object System.Drawing.Point(20, 140)
-$grid.Size = New-Object System.Drawing.Size(1040, 440)
+$grid.Location = New-Object System.Drawing.Point(20, 165)
+$grid.Size = New-Object System.Drawing.Size(1040, 415)
 $grid.Anchor = "Top,Bottom,Left,Right"
 $grid.AutoSizeColumnsMode = "Fill"
 $grid.SelectionMode = "FullRowSelect"
@@ -384,7 +492,7 @@ $grid.MultiSelect = $true
 $grid.ReadOnly = $true
 $grid.AllowUserToAddRows = $false
 $grid.AllowUserToDeleteRows = $false
-$grid.DataSource = $table
+$grid.DataSource = $tableView
 $form.Controls.Add($grid)
 
 $status = New-Object System.Windows.Forms.Label
@@ -393,6 +501,36 @@ $status.Location = New-Object System.Drawing.Point(20, 595)
 $status.Size = New-Object System.Drawing.Size(1040, 25)
 $status.Anchor = "Bottom,Left,Right"
 $form.Controls.Add($status)
+
+function Update-TableFilter {
+    $searchText = $txtTableSearch.Text.Trim()
+
+    if ([string]::IsNullOrWhiteSpace($searchText)) {
+        $tableView.RowFilter = ""
+    }
+    else {
+        $filterText = ConvertTo-DataViewLikeValue -Value $searchText
+        $tableView.RowFilter = @(
+            "[IPv4] LIKE '%$filterText%'",
+            "[DNSName] LIKE '%$filterText%'",
+            "[MAC] LIKE '%$filterText%'",
+            "[Vendor] LIKE '%$filterText%'"
+        ) -join " OR "
+    }
+
+    if ($table.Rows.Count -gt 0) {
+        if ([string]::IsNullOrWhiteSpace($searchText)) {
+            $status.Text = "Fertig. Gefundene Eintraege: $($table.Rows.Count)"
+        }
+        else {
+            $status.Text = "Filter: $($tableView.Count) von $($table.Rows.Count) Eintraegen sichtbar."
+        }
+    }
+}
+
+$txtTableSearch.Add_TextChanged({
+    Update-TableFilter
+})
 
 foreach ($router in $script:RouterConfigs) {
     [void]$cmbRouter.Items.Add($router.Name)
@@ -448,6 +586,8 @@ $btnStart.Add_Click({
     $macSearch    = $txtMacSearch.Text.Trim()
     $freeSearch   = $txtFreeSearch.Text.Trim()
     $resolveDns   = [bool]$chkResolveDns.Checked
+    $resolveVendor = [bool]$chkResolveVendor.Checked
+    $macVendorMap = $script:MacVendorMap
 
     $scriptBlock = {
         param(
@@ -458,7 +598,9 @@ $btnStart.Add_Click({
             $IpAddress,
             $MacAddress,
             $SearchString,
-            $ResolveDns
+            $ResolveDns,
+            $ResolveVendor,
+            $MacVendorMap
         )
 
         function ConvertTo-MacRegex {
@@ -626,6 +768,33 @@ $btnStart.Add_Click({
             }
         }
 
+        function Resolve-MacVendor {
+            param(
+                [AllowEmptyString()]
+                [string]$Mac,
+
+                [hashtable]$VendorMap
+            )
+
+            if ([string]::IsNullOrWhiteSpace($Mac) -or -not $VendorMap -or $VendorMap.Count -eq 0) {
+                return ""
+            }
+
+            $hex = ($Mac -replace '[^0-9A-Fa-f]', '').ToUpper()
+
+            if ($hex.Length -lt 6) {
+                return ""
+            }
+
+            $prefix = $hex.Substring(0, 6)
+
+            if ($VendorMap.ContainsKey($prefix)) {
+                return [string]$VendorMap[$prefix]
+            }
+
+            return ""
+        }
+
         function ConvertFrom-SnmpWalkArpLine {
             param(
                 [Parameter(Mandatory = $true)]
@@ -690,6 +859,7 @@ $btnStart.Add_Click({
                 IPv4         = $ipv4
                 DNSName      = ""
                 MAC          = $mac
+                Vendor       = ""
                 SNMPType     = $type
                 OriginalLine = $Line
             }
@@ -762,10 +932,15 @@ $btnStart.Add_Click({
                     }
                 }
 
+                if ($ResolveVendor) {
+                    $entry.Vendor = Resolve-MacVendor -Mac $entry.MAC -VendorMap $MacVendorMap
+                }
+
                 [PSCustomObject]@{
                     IPv4    = $entry.IPv4
                     DNSName = $entry.DNSName
                     MAC     = $entry.MAC
+                    Vendor  = $entry.Vendor
                 }
             }
         }
@@ -782,7 +957,9 @@ $btnStart.Add_Click({
             $ipSearch,
             $macSearch,
             $freeSearch,
-            $resolveDns
+            $resolveDns,
+            $resolveVendor,
+            $macVendorMap
         )
     }
     catch {
@@ -827,10 +1004,11 @@ $timer.Add_Tick({
                     $row.IPv4    = $entry.IPv4
                     $row.DNSName = $entry.DNSName
                     $row.MAC     = $entry.MAC
+                    $row.Vendor  = $entry.Vendor
                     $table.Rows.Add($row)
                 }
 
-                $status.Text = "Fertig. Gefundene Eintraege: $($table.Rows.Count)"
+                Update-TableFilter
             }
             elseif ($script:CurrentJob.State -eq "Failed") {
                 $err = Receive-Job -Job $script:CurrentJob -ErrorAction SilentlyContinue 2>&1
@@ -865,9 +1043,9 @@ $timer.Start()
 # CSV exportieren
 
 $btnExport.Add_Click({
-    if ($table.Rows.Count -eq 0) {
+    if ($tableView.Count -eq 0) {
         [System.Windows.Forms.MessageBox]::Show(
-            "Es sind keine Ergebnisse vorhanden.",
+            "Es sind keine sichtbaren Ergebnisse vorhanden.",
             "CSV Export",
             "OK",
             "Information"
@@ -881,7 +1059,7 @@ $btnExport.Add_Click({
 
     if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         try {
-            Convert-DataTableToObjects -Table $table |
+            Convert-DataViewToObjects -View $tableView |
                 Export-Csv -Path $dialog.FileName -NoTypeInformation -Encoding UTF8 -Delimiter ";"
 
             $status.Text = "CSV exportiert: $($dialog.FileName)"
@@ -906,14 +1084,14 @@ $btnCopy.Add_Click({
     }
 
     $lines = @()
-    $lines += "IPv4`tDNSName`tMAC"
+    $lines += "IPv4`tDNSName`tMAC`tVendor"
 
     foreach ($row in $grid.SelectedRows) {
         if ($row.IsNewRow) {
             continue
         }
 
-        $lines += "$($row.Cells["IPv4"].Value)`t$($row.Cells["DNSName"].Value)`t$($row.Cells["MAC"].Value)"
+        $lines += "$($row.Cells["IPv4"].Value)`t$($row.Cells["DNSName"].Value)`t$($row.Cells["MAC"].Value)`t$($row.Cells["Vendor"].Value)"
     }
 
     [System.Windows.Forms.Clipboard]::SetText(($lines -join [Environment]::NewLine))

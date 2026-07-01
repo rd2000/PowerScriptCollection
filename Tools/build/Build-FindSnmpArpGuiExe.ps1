@@ -30,8 +30,9 @@ if (-not (Get-Command "ps2exe" -ErrorAction SilentlyContinue)) {
 $snmpWalkB64 = Join-Path $b64Dir "snmpwalk.exe.b64"
 $netSnmpDllB64 = Join-Path $b64Dir "netsnmp.dll.b64"
 $routerConfig = Join-Path $configDir "routers.json"
+$macVendorsConfig = Join-Path $configDir "macvendors.csv"
 
-foreach ($file in @($snmpWalkB64, $netSnmpDllB64, $routerConfig)) {
+foreach ($file in @($snmpWalkB64, $netSnmpDllB64, $routerConfig, $macVendorsConfig)) {
     if (-not (Test-Path -LiteralPath $file)) {
         throw "Einzubettende Datei wurde nicht gefunden: $file"
     }
@@ -54,6 +55,7 @@ $embeddedFiles = @{
     "%LOCALAPPDATA%\SnmpArpGui\b64\snmpwalk.exe.b64" = $snmpWalkB64
     "%LOCALAPPDATA%\SnmpArpGui\b64\netsnmp.dll.b64"  = $netSnmpDllB64
     "%LOCALAPPDATA%\SnmpArpGui\config\routers.json"  = $routerConfig
+    "%LOCALAPPDATA%\SnmpArpGui\config\macvendors.csv" = $macVendorsConfig
 }
 
 $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json

@@ -121,6 +121,7 @@ Converts the selected columns without modifying the original input array.
 The tool uses Net-SNMP `snmpwalk` to query configured routers and displays matching ARP entries with IPv4 address, DNS name, and MAC address.
 
 Router definitions are stored in `Tools/config/routers.json`.  
+The app generates its local configuration files under `$env:LOCALAPPDATA\SnmpArpGui\config`; these files can also be edited, extended, or otherwise adjusted there.  
 Each router entry contains the router name, subnet information for the user, router IP or DNS name, SNMP community, and OID.  
 The GUI shows only the router selection and the related subnet hint; technical SNMP connection values are read from the configuration file.
 
