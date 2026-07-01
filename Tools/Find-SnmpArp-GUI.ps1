@@ -1,6 +1,6 @@
 # Find-SnmpArp-GUI.ps1
 # GUI fuer SNMP-ARP-Suche mit ausgelagerten Net-SNMP-Base64-Dateien
-# Ausgabe: IPv4, DNSName, MAC, Vendor
+# Ausgabe: IPv4, DNSName, MAC, Vendor, Interface, Description, SwitchIP
 
 # ---------------------------------------------------------------------------
 # Drittanbieter-Base64-Dateien
@@ -262,6 +262,7 @@ function Import-RouterConfigs {
         [PSCustomObject]@{
             Name      = [string]$router.name
             Subnet    = [string]$router.subnet
+            Switches  = [string]$router.switches
             RouterIp  = [string]$router.routerIp
             Community = [string]$router.community
             OID       = [string]$router.oid
@@ -330,10 +331,13 @@ function Convert-DataTableToObjects {
 
     foreach ($row in $Table.Rows) {
         [PSCustomObject]@{
-            IPv4    = $row.IPv4
-            DNSName = $row.DNSName
-            MAC     = $row.MAC
-            Vendor  = $row.Vendor
+            IPv4        = $row.IPv4
+            DNSName     = $row.DNSName
+            MAC         = $row.MAC
+            Vendor      = $row.Vendor
+            Interface   = $row.Interface
+            Description = $row.Description
+            SwitchIP    = $row.SwitchIP
         }
     }
 }
@@ -347,10 +351,13 @@ function Convert-DataViewToObjects {
         $row = $rowView.Row
 
         [PSCustomObject]@{
-            IPv4    = $row.IPv4
-            DNSName = $row.DNSName
-            MAC     = $row.MAC
-            Vendor  = $row.Vendor
+            IPv4        = $row.IPv4
+            DNSName     = $row.DNSName
+            MAC         = $row.MAC
+            Vendor      = $row.Vendor
+            Interface   = $row.Interface
+            Description = $row.Description
+            SwitchIP    = $row.SwitchIP
         }
     }
 }
@@ -439,6 +446,13 @@ $chkResolveVendor.Checked = ($script:MacVendorMap.Count -gt 0)
 $chkResolveVendor.Enabled = ($script:MacVendorMap.Count -gt 0)
 $form.Controls.Add($chkResolveVendor)
 
+$chkResolvePorts = New-Object System.Windows.Forms.CheckBox
+$chkResolvePorts.Text = "Ports aufloesen"
+$chkResolvePorts.Location = New-Object System.Drawing.Point(895, 101)
+$chkResolvePorts.Size = New-Object System.Drawing.Size(140, 22)
+$chkResolvePorts.Checked = $true
+$form.Controls.Add($chkResolvePorts)
+
 # Buttons
 
 $btnStart = New-Object System.Windows.Forms.Button
@@ -480,6 +494,9 @@ $table = New-Object System.Data.DataTable
 [void]$table.Columns.Add("DNSName", [string])
 [void]$table.Columns.Add("MAC", [string])
 [void]$table.Columns.Add("Vendor", [string])
+[void]$table.Columns.Add("Interface", [string])
+[void]$table.Columns.Add("Description", [string])
+[void]$table.Columns.Add("SwitchIP", [string])
 $tableView = New-Object System.Data.DataView -ArgumentList $table
 
 $grid = New-Object System.Windows.Forms.DataGridView
@@ -504,6 +521,7 @@ $form.Controls.Add($status)
 
 function Update-TableFilter {
     $searchText = $txtTableSearch.Text.Trim()
+    $joinedSwitchRows = @($table.Rows | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_.SwitchIP) }).Count
 
     if ([string]::IsNullOrWhiteSpace($searchText)) {
         $tableView.RowFilter = ""
@@ -514,16 +532,19 @@ function Update-TableFilter {
             "[IPv4] LIKE '%$filterText%'",
             "[DNSName] LIKE '%$filterText%'",
             "[MAC] LIKE '%$filterText%'",
-            "[Vendor] LIKE '%$filterText%'"
+            "[Vendor] LIKE '%$filterText%'",
+            "[Interface] LIKE '%$filterText%'",
+            "[Description] LIKE '%$filterText%'",
+            "[SwitchIP] LIKE '%$filterText%'"
         ) -join " OR "
     }
 
     if ($table.Rows.Count -gt 0) {
         if ([string]::IsNullOrWhiteSpace($searchText)) {
-            $status.Text = "Fertig. Gefundene Eintraege: $($table.Rows.Count)"
+            $status.Text = "Fertig. Gefundene Eintraege: $($table.Rows.Count). Switch-Zuordnungen: $joinedSwitchRows"
         }
         else {
-            $status.Text = "Filter: $($tableView.Count) von $($table.Rows.Count) Eintraegen sichtbar."
+            $status.Text = "Filter: $($tableView.Count) von $($table.Rows.Count) Eintraegen sichtbar. Switch-Zuordnungen: $joinedSwitchRows"
         }
     }
 }
@@ -576,10 +597,11 @@ $btnStart.Add_Click({
 
     $btnStart.Enabled = $false
     $btnStop.Enabled = $true
-    $status.Text = "SNMP-Abfrage laeuft..."
+    $status.Text = "SNMP- und Switch-Abfrage laufen..."
 
     $snmpWalkPath = $script:SnmpWalkPath
     $routerIp     = $selectedRouter.RouterIp
+    $switches     = $selectedRouter.Switches
     $community    = $selectedRouter.Community
     $oid          = $selectedRouter.OID
     $ipSearch     = $txtIpSearch.Text.Trim()
@@ -587,12 +609,14 @@ $btnStart.Add_Click({
     $freeSearch   = $txtFreeSearch.Text.Trim()
     $resolveDns   = [bool]$chkResolveDns.Checked
     $resolveVendor = [bool]$chkResolveVendor.Checked
+    $resolvePorts = [bool]$chkResolvePorts.Checked
     $macVendorMap = $script:MacVendorMap
 
     $scriptBlock = {
         param(
             $SnmpWalkPath,
             $RouterIp,
+            $Switches,
             $Community,
             $Oid,
             $IpAddress,
@@ -600,6 +624,7 @@ $btnStart.Add_Click({
             $SearchString,
             $ResolveDns,
             $ResolveVendor,
+            $ResolvePorts,
             $MacVendorMap
         )
 
@@ -795,6 +820,506 @@ $btnStart.Add_Click({
             return ""
         }
 
+        function ConvertTo-CanonicalMacKey {
+            param(
+                [AllowEmptyString()]
+                [string]$Mac
+            )
+
+            if ([string]::IsNullOrWhiteSpace($Mac)) {
+                return ""
+            }
+
+            $hex = ($Mac -replace '[^0-9A-Fa-f]', '').ToUpper()
+            if ($hex.Length -ne 12) {
+                return ""
+            }
+
+            return $hex
+        }
+
+        function ConvertTo-UInt32IPv4 {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$IPAddress
+            )
+
+            $bytes = [System.Net.IPAddress]::Parse($IPAddress).GetAddressBytes()
+
+            if ($bytes.Count -ne 4) {
+                throw "Nur IPv4 wird unterstuetzt: $IPAddress"
+            }
+
+            [array]::Reverse($bytes)
+            return [BitConverter]::ToUInt32($bytes, 0)
+        }
+
+        function ConvertFrom-UInt32IPv4 {
+            param(
+                [Parameter(Mandatory = $true)]
+                [uint32]$IPAddressInt
+            )
+
+            $bytes = [BitConverter]::GetBytes($IPAddressInt)
+            [array]::Reverse($bytes)
+            return ([System.Net.IPAddress]::new($bytes)).ToString()
+        }
+
+        function Get-IPv4RangeFromCidr {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$Cidr
+            )
+
+            if ($Cidr -notmatch '^(?<IP>\d{1,3}(?:\.\d{1,3}){3})/(?<Prefix>\d{1,2})$') {
+                throw "Ungueltiges CIDR-Format. Beispiel: 192.168.0.1/24"
+            }
+
+            $ip = $matches['IP']
+            $prefix = [int]$matches['Prefix']
+
+            if ($prefix -lt 0 -or $prefix -gt 32) {
+                throw "Ungueltige CIDR-Prefixlaenge: $prefix"
+            }
+
+            $ipInt = ConvertTo-UInt32IPv4 -IPAddress $ip
+            $mask = [uint32]0
+
+            for ($i = 0; $i -lt $prefix; $i++) {
+                $mask = $mask -bor ([uint32]1 -shl (31 - $i))
+            }
+
+            $network = [uint32]($ipInt -band $mask)
+            $wildcard = [uint32]([uint32]::MaxValue -bxor $mask)
+            $broadcast = [uint32]($network -bor $wildcard)
+
+            if ($prefix -le 30) {
+                $start = [uint32]($network + 1)
+                $end = [uint32]($broadcast - 1)
+            }
+            else {
+                $start = $network
+                $end = $broadcast
+            }
+
+            for ($current = $start; $current -le $end; $current++) {
+                ConvertFrom-UInt32IPv4 -IPAddressInt $current
+            }
+        }
+
+        function Test-IPv4Ping {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$IPAddress,
+
+                [int]$TimeoutMilliseconds = 500
+            )
+
+            try {
+                $ping = New-Object System.Net.NetworkInformation.Ping
+                $reply = $ping.Send($IPAddress, $TimeoutMilliseconds)
+                return ($reply.Status -eq [System.Net.NetworkInformation.IPStatus]::Success)
+            }
+            catch {
+                return $false
+            }
+            finally {
+                if ($ping) {
+                    $ping.Dispose()
+                }
+            }
+        }
+
+        function Test-SwitchOnline {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$IPAddress,
+
+                [int]$TimeoutMilliseconds = 1000,
+
+                [int]$Attempts = 2
+            )
+
+            for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+                try {
+                    if (Test-IPv4Ping -IPAddress $IPAddress -TimeoutMilliseconds $TimeoutMilliseconds) {
+                        return $true
+                    }
+                }
+                catch {
+                    # Danach mit dem naechsten Versuch weitermachen.
+                }
+
+                if ($attempt -lt $Attempts) {
+                    Start-Sleep -Milliseconds 150
+                }
+            }
+
+            return $false
+        }
+
+        function ConvertFrom-SnmpWalkLine {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$Line
+            )
+
+            if ($Line -match '^(?<Oid>\.?[0-9]+(?:\.[0-9]+)*)\s+=\s+(?<SnmpType>[^:]+):\s*(?<Value>.*)$') {
+                $value = $matches['Value'].Trim()
+
+                if ($value.Length -ge 2 -and $value.StartsWith('"') -and $value.EndsWith('"')) {
+                    $value = $value.Substring(1, $value.Length - 2)
+                }
+
+                [PSCustomObject]@{
+                    Oid      = $matches['Oid'].TrimStart('.')
+                    SnmpType = $matches['SnmpType'].Trim()
+                    Value    = $value
+                    RawLine  = $Line
+                }
+            }
+        }
+
+        function Get-SnmpIndexPart {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$FullOid,
+
+                [Parameter(Mandatory = $true)]
+                [string]$BaseOid
+            )
+
+            $FullOid = $FullOid.TrimStart('.')
+            $BaseOid = $BaseOid.TrimStart('.')
+
+            if ($FullOid -match "^$([regex]::Escape($BaseOid))\.(?<Index>.+)$") {
+                return $matches['Index']
+            }
+
+            return $null
+        }
+
+        function Convert-MacFromDecimalBytes {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string[]]$MacBytes
+            )
+
+            if ($MacBytes.Count -ne 6) {
+                throw "MAC hat nicht exakt 6 Bytes."
+            }
+
+            ($MacBytes | ForEach-Object {
+                $byte = [int]$_
+
+                if ($byte -lt 0 -or $byte -gt 255) {
+                    throw "Ungueltiges MAC-Byte: $byte"
+                }
+
+                "{0:X2}" -f $byte
+            }) -join ' '
+        }
+
+        function Invoke-SnmpWalkForSwitch {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$SwitchIP,
+
+                [Parameter(Mandatory = $true)]
+                [string]$Oid,
+
+                [Parameter(Mandatory = $true)]
+                [string]$Community,
+
+                [Parameter(Mandatory = $true)]
+                [string]$SnmpWalkPath
+            )
+
+            $env:MIBS = ""
+
+            $output = & $SnmpWalkPath -v2c -c $Community -On -t 1 -r 0 $SwitchIP $Oid 2>&1
+            $lines = @($output | ForEach-Object { [string]$_ })
+            $text = ($lines -join " ")
+
+            if ($LASTEXITCODE -ne 0 -or
+                $text -match 'Timeout:\s+No Response|No Such Object|No Such Instance|Unknown Object Identifier|Authentication failure|authorizationError|not in view') {
+                throw $text
+            }
+
+            return $lines
+        }
+
+        function Get-CiscoSwitchPortSecurity {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$SwitchIP,
+
+                [Parameter(Mandatory = $true)]
+                [string]$Community,
+
+                [Parameter(Mandatory = $true)]
+                [string]$SnmpWalkPath
+            )
+
+            $oidIfName = "1.3.6.1.2.1.31.1.1.1.1"
+            $oidIfAlias = "1.3.6.1.2.1.31.1.1.1.18"
+            $oidIfDescr = "1.3.6.1.2.1.2.2.1.2"
+            $oidSecureVlan = "1.3.6.1.4.1.9.9.315.1.2.3.1.3"
+            $oidSecureFallback = "1.3.6.1.4.1.9.9.315.1.2.2.1.2"
+
+            $ifNames = @{}
+            $ifAliases = @{}
+
+            try {
+                $ifLines = Invoke-SnmpWalkForSwitch -SwitchIP $SwitchIP -Oid $oidIfName -Community $Community -SnmpWalkPath $SnmpWalkPath
+
+                foreach ($item in ($ifLines | ForEach-Object { ConvertFrom-SnmpWalkLine -Line $_ })) {
+                    if (-not $item) {
+                        continue
+                    }
+
+                    $ifIndex = Get-SnmpIndexPart -FullOid $item.Oid -BaseOid $oidIfName
+                    if ($ifIndex -and $ifIndex -match '^\d+$') {
+                        $ifNames[$ifIndex] = $item.Value
+                    }
+                }
+            }
+            catch {
+                try {
+                    $ifDescrLines = Invoke-SnmpWalkForSwitch -SwitchIP $SwitchIP -Oid $oidIfDescr -Community $Community -SnmpWalkPath $SnmpWalkPath
+
+                    foreach ($item in ($ifDescrLines | ForEach-Object { ConvertFrom-SnmpWalkLine -Line $_ })) {
+                        if (-not $item) {
+                            continue
+                        }
+
+                        $ifIndex = Get-SnmpIndexPart -FullOid $item.Oid -BaseOid $oidIfDescr
+                        if ($ifIndex -and $ifIndex -match '^\d+$') {
+                            $ifNames[$ifIndex] = $item.Value
+                        }
+                    }
+                }
+                catch {
+                    return @()
+                }
+            }
+
+            try {
+                $ifAliasLines = Invoke-SnmpWalkForSwitch -SwitchIP $SwitchIP -Oid $oidIfAlias -Community $Community -SnmpWalkPath $SnmpWalkPath
+
+                foreach ($item in ($ifAliasLines | ForEach-Object { ConvertFrom-SnmpWalkLine -Line $_ })) {
+                    if (-not $item) {
+                        continue
+                    }
+
+                    $ifIndex = Get-SnmpIndexPart -FullOid $item.Oid -BaseOid $oidIfAlias
+                    if ($ifIndex -and $ifIndex -match '^\d+$') {
+                        $ifAliases[$ifIndex] = $item.Value
+                    }
+                }
+            }
+            catch {
+                $ifAliases = @{}
+            }
+
+            $results = New-Object 'System.Collections.Generic.List[object]'
+
+            foreach ($tableDefinition in @(
+                @{ Oid = $oidSecureVlan; HasVlan = $true },
+                @{ Oid = $oidSecureFallback; HasVlan = $false }
+            )) {
+                try {
+                    $secureLines = Invoke-SnmpWalkForSwitch -SwitchIP $SwitchIP -Oid $tableDefinition.Oid -Community $Community -SnmpWalkPath $SnmpWalkPath
+
+                    foreach ($item in ($secureLines | ForEach-Object { ConvertFrom-SnmpWalkLine -Line $_ })) {
+                        if (-not $item) {
+                            continue
+                        }
+
+                        $indexPart = Get-SnmpIndexPart -FullOid $item.Oid -BaseOid $tableDefinition.Oid
+                        if (-not $indexPart) {
+                            continue
+                        }
+
+                        $parts = $indexPart -split '\.'
+                        $expectedCount = if ($tableDefinition.HasVlan) { 8 } else { 7 }
+
+                        if ($parts.Count -ne $expectedCount) {
+                            continue
+                        }
+
+                        $ifIndex = $parts[0]
+                        $macPart = $parts[1..6]
+
+                        try {
+                            $mac = Convert-MacFromDecimalBytes -MacBytes $macPart
+                        }
+                        catch {
+                            continue
+                        }
+
+                        $interface = if ($ifNames.ContainsKey($ifIndex)) {
+                            $ifNames[$ifIndex]
+                        }
+                        else {
+                            "<IfIndex $ifIndex>"
+                        }
+
+                        $description = if ($ifAliases.ContainsKey($ifIndex)) {
+                            $ifAliases[$ifIndex]
+                        }
+                        else {
+                            ""
+                        }
+
+                        $results.Add([PSCustomObject]@{
+                            SwitchIP    = $SwitchIP
+                            Interface   = $interface
+                            Description = $description
+                            MAC         = $mac
+                        })
+                    }
+
+                    if ($results.Count -gt 0) {
+                        break
+                    }
+                }
+                catch {
+                    continue
+                }
+            }
+
+            return $results.ToArray()
+        }
+
+        function Invoke-CiscoPortSecurityNetworkScan {
+            param(
+                [AllowEmptyString()]
+                [string]$NetworkCidr,
+
+                [int]$ThrottleLimit = 32
+            )
+
+            if ([string]::IsNullOrWhiteSpace($NetworkCidr)) {
+                return @()
+            }
+
+            $addresses = @(Get-IPv4RangeFromCidr -Cidr $NetworkCidr)
+            $results = New-Object 'System.Collections.Generic.List[object]'
+            $functionDefinitions = @(
+                ${function:Test-IPv4Ping}.Ast.Extent.Text
+                ${function:Test-SwitchOnline}.Ast.Extent.Text
+                ${function:ConvertFrom-SnmpWalkLine}.Ast.Extent.Text
+                ${function:Get-SnmpIndexPart}.Ast.Extent.Text
+                ${function:Convert-MacFromDecimalBytes}.Ast.Extent.Text
+                ${function:Invoke-SnmpWalkForSwitch}.Ast.Extent.Text
+                ${function:Get-CiscoSwitchPortSecurity}.Ast.Extent.Text
+            ) -join "`r`n"
+
+            $scanScript = {
+                param(
+                    [Parameter(Mandatory = $true)]
+                    [string]$SwitchIP,
+
+                    [Parameter(Mandatory = $true)]
+                    [string]$CommunityValue,
+
+                    [Parameter(Mandatory = $true)]
+                    [string]$SnmpWalkPathValue,
+
+                    [Parameter(Mandatory = $true)]
+                    [string]$FunctionDefinitions,
+
+                    [int]$PingTimeoutMilliseconds = 1000,
+
+                    [bool]$UseOnlineCheck = $true
+                )
+
+                $snmpToolDir = Split-Path -Parent $SnmpWalkPathValue
+                if (-not [string]::IsNullOrWhiteSpace($snmpToolDir) -and $env:PATH -notlike "*$snmpToolDir*") {
+                    $env:PATH = "$snmpToolDir;$env:PATH"
+                }
+
+                Invoke-Expression $FunctionDefinitions
+
+                if ($UseOnlineCheck -and -not (Test-SwitchOnline -IPAddress $SwitchIP -TimeoutMilliseconds $PingTimeoutMilliseconds)) {
+                    return @()
+                }
+
+                return @(Get-CiscoSwitchPortSecurity -SwitchIP $SwitchIP -Community $CommunityValue -SnmpWalkPath $SnmpWalkPathValue)
+            }
+
+            function Invoke-PortSecurityRunspacePass {
+                param(
+                    [bool]$UseOnlineCheck
+                )
+
+                $passResults = New-Object 'System.Collections.Generic.List[object]'
+                $runspacePool = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspacePool(1, $ThrottleLimit)
+                $runspacePool.Open()
+                $tasks = New-Object 'System.Collections.Generic.List[object]'
+
+                try {
+                    foreach ($switchIp in $addresses) {
+                        $powerShell = [powershell]::Create()
+                        $powerShell.RunspacePool = $runspacePool
+
+                        [void]$powerShell.AddScript($scanScript.ToString())
+                        [void]$powerShell.AddArgument($switchIp)
+                        [void]$powerShell.AddArgument($Community)
+                        [void]$powerShell.AddArgument($SnmpWalkPath)
+                        [void]$powerShell.AddArgument($functionDefinitions)
+                        [void]$powerShell.AddArgument(1000)
+                        [void]$powerShell.AddArgument($UseOnlineCheck)
+
+                        $tasks.Add([PSCustomObject]@{
+                            PowerShell = $powerShell
+                            Handle     = $powerShell.BeginInvoke()
+                        })
+                    }
+
+                    foreach ($task in $tasks) {
+                        try {
+                            foreach ($entry in @($task.PowerShell.EndInvoke($task.Handle))) {
+                                if ($entry) {
+                                    $passResults.Add($entry)
+                                }
+                            }
+                        }
+                        catch {
+                            continue
+                        }
+                    }
+                }
+                finally {
+                    foreach ($task in $tasks) {
+                        if ($task.PowerShell) {
+                            $task.PowerShell.Dispose()
+                        }
+                    }
+
+                    if ($runspacePool) {
+                        $runspacePool.Close()
+                        $runspacePool.Dispose()
+                    }
+                }
+
+                return $passResults.ToArray()
+            }
+
+            foreach ($entry in @(Invoke-PortSecurityRunspacePass -UseOnlineCheck $true)) {
+                $results.Add($entry)
+            }
+
+            if ($results.Count -eq 0) {
+                foreach ($entry in @(Invoke-PortSecurityRunspacePass -UseOnlineCheck $false)) {
+                    $results.Add($entry)
+                }
+            }
+
+            return $results.ToArray()
+        }
+
         function ConvertFrom-SnmpWalkArpLine {
             param(
                 [Parameter(Mandatory = $true)]
@@ -937,11 +1462,46 @@ $btnStart.Add_Click({
                 }
 
                 [PSCustomObject]@{
-                    IPv4    = $entry.IPv4
-                    DNSName = $entry.DNSName
-                    MAC     = $entry.MAC
-                    Vendor  = $entry.Vendor
+                    IPv4        = $entry.IPv4
+                    DNSName     = $entry.DNSName
+                    MAC         = $entry.MAC
+                    Vendor      = $entry.Vendor
+                    Interface   = ""
+                    Description = ""
+                    SwitchIP    = ""
                 }
+            }
+        }
+
+        $portSecurityLookup = @{}
+
+        if ($ResolvePorts) {
+            try {
+                foreach ($portEntry in (Invoke-CiscoPortSecurityNetworkScan -NetworkCidr $Switches)) {
+                    $macKey = ConvertTo-CanonicalMacKey -Mac $portEntry.MAC
+
+                    if ([string]::IsNullOrWhiteSpace($macKey)) {
+                        continue
+                    }
+
+                    if (-not $portSecurityLookup.ContainsKey($macKey)) {
+                        $portSecurityLookup[$macKey] = $portEntry
+                    }
+                }
+            }
+            catch {
+                $portSecurityLookup = @{}
+            }
+        }
+
+        foreach ($item in $items) {
+            $macKey = ConvertTo-CanonicalMacKey -Mac $item.MAC
+
+            if (-not [string]::IsNullOrWhiteSpace($macKey) -and $portSecurityLookup.ContainsKey($macKey)) {
+                $portEntry = $portSecurityLookup[$macKey]
+                $item.Interface = $portEntry.Interface
+                $item.Description = $portEntry.Description
+                $item.SwitchIP = $portEntry.SwitchIP
             }
         }
 
@@ -952,6 +1512,7 @@ $btnStart.Add_Click({
         $script:CurrentJob = Start-Job -ScriptBlock $scriptBlock -ArgumentList @(
             $snmpWalkPath,
             $routerIp,
+            $switches,
             $community,
             $oid,
             $ipSearch,
@@ -959,6 +1520,7 @@ $btnStart.Add_Click({
             $freeSearch,
             $resolveDns,
             $resolveVendor,
+            $resolvePorts,
             $macVendorMap
         )
     }
@@ -1005,6 +1567,9 @@ $timer.Add_Tick({
                     $row.DNSName = $entry.DNSName
                     $row.MAC     = $entry.MAC
                     $row.Vendor  = $entry.Vendor
+                    $row.Interface = $entry.Interface
+                    $row.Description = $entry.Description
+                    $row.SwitchIP = $entry.SwitchIP
                     $table.Rows.Add($row)
                 }
 
@@ -1084,14 +1649,14 @@ $btnCopy.Add_Click({
     }
 
     $lines = @()
-    $lines += "IPv4`tDNSName`tMAC`tVendor"
+    $lines += "IPv4`tDNSName`tMAC`tVendor`tInterface`tDescription`tSwitchIP"
 
     foreach ($row in $grid.SelectedRows) {
         if ($row.IsNewRow) {
             continue
         }
 
-        $lines += "$($row.Cells["IPv4"].Value)`t$($row.Cells["DNSName"].Value)`t$($row.Cells["MAC"].Value)`t$($row.Cells["Vendor"].Value)"
+        $lines += "$($row.Cells["IPv4"].Value)`t$($row.Cells["DNSName"].Value)`t$($row.Cells["MAC"].Value)`t$($row.Cells["Vendor"].Value)`t$($row.Cells["Interface"].Value)`t$($row.Cells["Description"].Value)`t$($row.Cells["SwitchIP"].Value)"
     }
 
     [System.Windows.Forms.Clipboard]::SetText(($lines -join [Environment]::NewLine))
