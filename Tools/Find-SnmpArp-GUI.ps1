@@ -15,6 +15,27 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Data
 
+$script:AboutText = @"
+SNMP ARP Suche
+
+Diese Anwendung fragt SNMP-ARP-Tabellen ab und kann die Ergebnisse mit DNS-Namen,
+MAC-Vendor-Informationen und Cisco Port-Security-Daten anreichern.
+
+Funktionen:
+
+* Router-Auswahl
+* Anzeige des entsprechenden Subnetzes
+* Suche nach IPv4-Adresse, MAC-Adresse oder Freitext
+* Filterung der Ergebnis-Tabelle
+* Export der Ergebnisse als CSV-Datei
+* DNS-Auflösung (optional)
+* Vendor-Auflösung (optional)
+* Port-Auflösung (optional, Cisco Port-Security)
+* Überschreibbare Konfiguration (Siehe: `$env:LOCALAPPDATA`)
+* Selbstextrahierende EXE mit eingebetteten Base64-Dateien (snmpwalk.exe, netsnmp.dll, routers.json, macvendors.csv)
+
+"@
+
 # Bei direktem Start als .ps1 automatisch mit STA neu starten.
 # Bei spaeterer EXE-Konvertierung bitte beim Konvertieren STA aktivieren, z.B. ps2exe mit -STA.
 if ([System.Threading.Thread]::CurrentThread.ApartmentState -ne 'STA') {
@@ -402,9 +423,31 @@ if (-not $script:MacVendorMap) {
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "SNMP ARP Suche"
-$form.Size = New-Object System.Drawing.Size(1100, 680)
+$form.Size = New-Object System.Drawing.Size(1100, 704)
 $form.StartPosition = "CenterScreen"
-$form.MinimumSize = New-Object System.Drawing.Size(900, 560)
+$form.MinimumSize = New-Object System.Drawing.Size(900, 584)
+
+$menuStrip = New-Object System.Windows.Forms.MenuStrip
+$menuStrip.Dock = "Top"
+
+$helpMenu = New-Object System.Windows.Forms.ToolStripMenuItem
+$helpMenu.Text = "Help"
+
+$aboutMenuItem = New-Object System.Windows.Forms.ToolStripMenuItem
+$aboutMenuItem.Text = "About"
+$aboutMenuItem.Add_Click({
+    [System.Windows.Forms.MessageBox]::Show(
+        $script:AboutText,
+        "About SNMP ARP Suche",
+        "OK",
+        "Information"
+    ) | Out-Null
+})
+
+[void]$helpMenu.DropDownItems.Add($aboutMenuItem)
+[void]$menuStrip.Items.Add($helpMenu)
+$form.MainMenuStrip = $menuStrip
+$form.Controls.Add($menuStrip)
 
 # Eingabefelder
 
@@ -1669,5 +1712,14 @@ $form.Add_FormClosing({
         Remove-Job -Job $script:CurrentJob -Force -ErrorAction SilentlyContinue
     }
 })
+
+$menuOffsetY = $menuStrip.PreferredSize.Height
+foreach ($control in $form.Controls) {
+    if ($control -eq $menuStrip) {
+        continue
+    }
+
+    $control.Location = New-Object System.Drawing.Point($control.Location.X, ($control.Location.Y + $menuOffsetY))
+}
 
 [void]$form.ShowDialog()
